@@ -5,8 +5,18 @@ const initialModalData = { isOpen: false, data: {}, isLoading: false };
 
 // Initial state
 const initialState = {
-  // User
   profile: initialModalData,
+  createAdmin: initialModalData,
+  editAdmin: initialModalData,
+  assignRegions: initialModalData,
+  requestDetail: initialModalData,
+  createService: initialModalData,
+  editService: initialModalData,
+  createMskCategory: initialModalData,
+  editMskCategory: initialModalData,
+  mskOrderDetail: initialModalData,
+  createRegion: initialModalData,
+  editRegion: initialModalData,
 };
 
 export const modalSlice = createSlice({
@@ -17,15 +27,14 @@ export const modalSlice = createSlice({
       const { modal, data } = action.payload;
       if (!state[modal]) return;
       state[modal].isOpen = true;
-
-      Object.assign(state[modal].data, data || {});
+      state[modal].data = data || {};
     },
 
     close: (state, action) => {
-      const { modal, data } = action.payload;
+      const { modal } = action.payload;
       if (!state[modal]) return;
       state[modal].isOpen = false;
-      Object.assign(state[modal].data, data || {});
+      state[modal].data = {};
     },
 
     updateData: (state, action) => {
