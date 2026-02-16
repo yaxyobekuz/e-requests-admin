@@ -1,4 +1,4 @@
 // Images
-import logo from "@/assets/images/logo.png";
+import logo from "@/shared/assets/images/logo.png";
 
 export { logo };
