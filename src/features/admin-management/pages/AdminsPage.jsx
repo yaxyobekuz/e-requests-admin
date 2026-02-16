@@ -1,0 +1,426 @@
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { adminsAPI, regionsAPI } from "@/shared/api/http";
+import ModalWrapper from "@/shared/components/ui/ModalWrapper";
+import { useDispatch } from "react-redux";
+import { open } from "@/features/modal/store/modal.slice";
+import { Plus, Pencil, Trash2, MapPin } from "lucide-react";
+import PhoneInput from "@/shared/components/ui/PhoneInput";
+
+const AdminsPage = () => {
+  const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+
+  const { data: admins = [], isLoading } = useQuery({
+    queryKey: ["admins"],
+    queryFn: () => adminsAPI.getAll().then((res) => res.data),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id) => adminsAPI.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admins"] });
+      toast.success("Admin o'chirildi!");
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || "Xatolik yuz berdi");
+    },
+  });
+
+  return (
+    <div className="p-6">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">Adminlar</h1>
+          <p className="text-sm text-gray-500">Adminlarni boshqarish</p>
+        </div>
+        <button
+          onClick={() => dispatch(open({ modal: "createAdmin" }))}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+        >
+          <Plus className="w-4 h-4" />
+          Yangi admin
+        </button>
+      </div>
+
+      <div className="bg-white rounded-xl border overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-gray-50 border-b">
+            <tr>
+              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Tahallus</th>
+              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Ism</th>
+              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Telefon</th>
+              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Hududlar</th>
+              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Holat</th>
+              <th className="text-right px-4 py-3 text-sm font-medium text-gray-500">Amallar</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y">
+            {admins.map((admin) => (
+              <tr key={admin._id} className="hover:bg-gray-50">
+                <td className="px-4 py-3 text-sm font-medium">{admin.alias}</td>
+                <td className="px-4 py-3 text-sm">{admin.firstName} {admin.lastName}</td>
+                <td className="px-4 py-3 text-sm text-gray-500">{admin.phone}</td>
+                <td className="px-4 py-3 text-sm">
+                  {admin.assignedRegion ? (
+                    <span className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full">
+                      {admin.assignedRegion.region?.name || "—"}
+                      <span className="text-blue-400 ml-0.5">
+                        [{REGION_TYPE_LABELS[admin.assignedRegion.regionType] || admin.assignedRegion.regionType}]
+                      </span>
+                    </span>
+                  ) : (
+                    <span className="text-gray-400">Belgilanmagan</span>
+                  )}
+                </td>
+                <td className="px-4 py-3 text-sm">
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-xs ${admin.isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
+                  >
+                    {admin.isActive ? "Faol" : "Nofaol"}
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <div className="flex items-center justify-end gap-1">
+                    <button
+                      onClick={() => dispatch(open({ modal: "assignRegions", data: admin }))}
+                      className="p-1.5 text-gray-400 hover:text-blue-600"
+                      title="Hudud tayinlash"
+                    >
+                      <MapPin className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => dispatch(open({ modal: "editAdmin", data: admin }))}
+                      className="p-1.5 text-gray-400 hover:text-blue-600"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (confirm("Adminni o'chirishni tasdiqlaysizmi?")) {
+                          deleteMutation.mutate(admin._id);
+                        }
+                      }}
+                      className="p-1.5 text-gray-400 hover:text-red-600"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {admins.length === 0 && !isLoading && (
+          <div className="text-center py-12 text-gray-500">Adminlar yo'q</div>
+        )}
+      </div>
+
+      <ModalWrapper name="createAdmin" title="Yangi admin yaratish">
+        <CreateAdminForm />
+      </ModalWrapper>
+
+      <ModalWrapper name="editAdmin" title="Adminni tahrirlash">
+        <EditAdminForm />
+      </ModalWrapper>
+
+      <ModalWrapper name="assignRegions" title="Hudud tayinlash" className="max-w-lg">
+        <AssignRegionForm />
+      </ModalWrapper>
+    </div>
+  );
+};
+
+const CreateAdminForm = ({ close, isLoading, setIsLoading }) => {
+  const queryClient = useQueryClient();
+  const [form, setForm] = useState({
+    phone: "",
+    password: "",
+    firstName: "",
+    lastName: "",
+    alias: "",
+  });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const cleanPhone = form.phone.replace(/\D/g, "");
+    if (cleanPhone.length < 12) return toast.error("Telefon raqamni to'liq kiriting");
+    if (!form.password) return toast.error("Parolni kiriting");
+    if (!form.alias.trim()) return toast.error("Tahallus kiritilishi shart");
+
+    setIsLoading(true);
+    try {
+      await adminsAPI.create({ ...form, phone: `+${cleanPhone}` });
+      queryClient.invalidateQueries({ queryKey: ["admins"] });
+      toast.success("Admin yaratildi!");
+      close();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Xatolik yuz berdi");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-3">
+      <div>
+        <label className="block text-sm font-medium mb-1">Tahallus *</label>
+        <input
+          type="text" value={form.alias}
+          onChange={(e) => setForm((p) => ({ ...p, alias: e.target.value }))}
+          className="w-full px-3 py-2 border rounded-lg"
+          placeholder="admin_toshkent"
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-sm font-medium mb-1">Ism</label>
+          <input type="text" value={form.firstName}
+            onChange={(e) => setForm((p) => ({ ...p, firstName: e.target.value }))}
+            className="w-full px-3 py-2 border rounded-lg" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Familiya</label>
+          <input type="text" value={form.lastName}
+            onChange={(e) => setForm((p) => ({ ...p, lastName: e.target.value }))}
+            className="w-full px-3 py-2 border rounded-lg" />
+        </div>
+      </div>
+      <div>
+        <label className="block text-sm font-medium mb-1">Telefon *</label>
+        <PhoneInput value={form.phone}
+          onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium mb-1">Parol *</label>
+        <input type="password" value={form.password}
+          onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
+          className="w-full px-3 py-2 border rounded-lg" placeholder="Kamida 6 ta belgi" />
+      </div>
+      <button type="submit" disabled={isLoading}
+        className="w-full py-2.5 bg-blue-600 text-white rounded-lg font-medium disabled:opacity-50">
+        {isLoading ? "Yaratilmoqda..." : "Yaratish"}
+      </button>
+    </form>
+  );
+};
+
+const EditAdminForm = ({ _id, firstName, lastName, alias, isActive, close, isLoading, setIsLoading }) => {
+  const queryClient = useQueryClient();
+  const [form, setForm] = useState({
+    firstName: firstName || "",
+    lastName: lastName || "",
+    alias: alias || "",
+    isActive: isActive !== false,
+    password: "",
+  });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const data = { ...form };
+      if (!data.password) delete data.password;
+      await adminsAPI.update(_id, data);
+      queryClient.invalidateQueries({ queryKey: ["admins"] });
+      toast.success("Admin yangilandi!");
+      close();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Xatolik yuz berdi");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-3">
+      <div>
+        <label className="block text-sm font-medium mb-1">Tahallus</label>
+        <input type="text" value={form.alias}
+          onChange={(e) => setForm((p) => ({ ...p, alias: e.target.value }))}
+          className="w-full px-3 py-2 border rounded-lg" />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-sm font-medium mb-1">Ism</label>
+          <input type="text" value={form.firstName}
+            onChange={(e) => setForm((p) => ({ ...p, firstName: e.target.value }))}
+            className="w-full px-3 py-2 border rounded-lg" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Familiya</label>
+          <input type="text" value={form.lastName}
+            onChange={(e) => setForm((p) => ({ ...p, lastName: e.target.value }))}
+            className="w-full px-3 py-2 border rounded-lg" />
+        </div>
+      </div>
+      <div>
+        <label className="block text-sm font-medium mb-1">Yangi parol (ixtiyoriy)</label>
+        <input type="password" value={form.password}
+          onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
+          className="w-full px-3 py-2 border rounded-lg" placeholder="Bo'sh qoldiring agar o'zgartirmasa" />
+      </div>
+      <label className="flex items-center gap-2">
+        <input type="checkbox" checked={form.isActive}
+          onChange={(e) => setForm((p) => ({ ...p, isActive: e.target.checked }))} />
+        <span className="text-sm">Faol</span>
+      </label>
+      <button type="submit" disabled={isLoading}
+        className="w-full py-2.5 bg-blue-600 text-white rounded-lg font-medium disabled:opacity-50">
+        {isLoading ? "Saqlanmoqda..." : "Saqlash"}
+      </button>
+    </form>
+  );
+};
+
+const REGION_TYPE_LABELS = { region: "Viloyat", district: "Tuman", neighborhood: "Mahalla" };
+
+const AssignRegionForm = ({ _id, assignedRegion, close, isLoading, setIsLoading }) => {
+  const queryClient = useQueryClient();
+
+  const current = assignedRegion || null;
+  const [picker, setPicker] = useState({
+    regionId: current?.regionType === "region" ? (current.region?._id || current.region || "") : "",
+    districtId: current?.regionType === "district" ? (current.region?._id || current.region || "") : "",
+    neighborhoodId: current?.regionType === "neighborhood" ? (current.region?._id || current.region || "") : "",
+  });
+
+  const { data: regions = [] } = useQuery({
+    queryKey: ["regions", "region"],
+    queryFn: () => regionsAPI.getAll({ type: "region" }).then((r) => r.data),
+  });
+
+  const { data: districts = [] } = useQuery({
+    queryKey: ["regions", "district", picker.regionId],
+    queryFn: () => regionsAPI.getAll({ type: "district", parent: picker.regionId }).then((r) => r.data),
+    enabled: !!picker.regionId,
+  });
+
+  const { data: neighborhoods = [] } = useQuery({
+    queryKey: ["regions", "neighborhood", picker.districtId],
+    queryFn: () => regionsAPI.getAll({ type: "neighborhood", parent: picker.districtId }).then((r) => r.data),
+    enabled: !!picker.districtId,
+  });
+
+  // Eng chuqur tanlangan darajani aniqlash
+  const getSelectedRegion = () => {
+    if (picker.neighborhoodId) return { region: picker.neighborhoodId, regionType: "neighborhood" };
+    if (picker.districtId) return { region: picker.districtId, regionType: "district" };
+    if (picker.regionId) return { region: picker.regionId, regionType: "region" };
+    return null;
+  };
+
+  const selectedRegion = getSelectedRegion();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedRegion) return toast.error("Hudud tanlang");
+
+    setIsLoading(true);
+    try {
+      await adminsAPI.setRegion(_id, { assignedRegion: selectedRegion });
+      queryClient.invalidateQueries({ queryKey: ["admins"] });
+      toast.success("Hudud tayinlandi!");
+      close();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Xatolik yuz berdi");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRemove = async () => {
+    setIsLoading(true);
+    try {
+      await adminsAPI.setRegion(_id, { assignedRegion: null });
+      queryClient.invalidateQueries({ queryKey: ["admins"] });
+      toast.success("Hudud olib tashlandi!");
+      close();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Xatolik yuz berdi");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Hozirgi tayinlangan hudud */}
+      {current && (
+        <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+          <div className="flex items-center gap-2">
+            <span className="text-xs px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded">
+              {REGION_TYPE_LABELS[current.regionType] || current.regionType}
+            </span>
+            <span className="text-sm font-medium">{current.region?.name || "—"}</span>
+          </div>
+          <button type="button" onClick={handleRemove} disabled={isLoading}
+            className="text-red-500 text-xs hover:underline">
+            Olib tashlash
+          </button>
+        </div>
+      )}
+
+      <div className="space-y-2">
+        <label className="block text-sm font-medium">
+          {current ? "Hududni o'zgartirish" : "Hudud tanlang"}
+        </label>
+
+        {/* Viloyat */}
+        <select
+          value={picker.regionId}
+          onChange={(e) => setPicker({ regionId: e.target.value, districtId: "", neighborhoodId: "" })}
+          className="w-full px-3 py-2 border rounded-lg text-sm"
+        >
+          <option value="">Viloyat tanlang</option>
+          {regions.map((r) => (
+            <option key={r._id} value={r._id}>{r.name}</option>
+          ))}
+        </select>
+
+        {/* Tuman */}
+        {picker.regionId && (
+          <select
+            value={picker.districtId}
+            onChange={(e) => setPicker((p) => ({ ...p, districtId: e.target.value, neighborhoodId: "" }))}
+            className="w-full px-3 py-2 border rounded-lg text-sm"
+          >
+            <option value="">Tuman tanlang (ixtiyoriy)</option>
+            {districts.map((d) => (
+              <option key={d._id} value={d._id}>{d.name}</option>
+            ))}
+          </select>
+        )}
+
+        {/* Mahalla */}
+        {picker.districtId && (
+          <select
+            value={picker.neighborhoodId}
+            onChange={(e) => setPicker((p) => ({ ...p, neighborhoodId: e.target.value }))}
+            className="w-full px-3 py-2 border rounded-lg text-sm"
+          >
+            <option value="">Mahalla tanlang (ixtiyoriy)</option>
+            {neighborhoods.map((n) => (
+              <option key={n._id} value={n._id}>{n.name}</option>
+            ))}
+          </select>
+        )}
+
+        {selectedRegion && (
+          <p className="text-xs text-gray-500">
+            Tayinlanadi: <span className="font-medium">{REGION_TYPE_LABELS[selectedRegion.regionType]}</span> darajasida
+          </p>
+        )}
+      </div>
+
+      <button type="submit" disabled={isLoading || !selectedRegion}
+        className="w-full py-2.5 bg-blue-600 text-white rounded-lg font-medium disabled:opacity-50">
+        {isLoading ? "Saqlanmoqda..." : "Saqlash"}
+      </button>
+    </form>
+  );
+};
+
+export default AdminsPage;
