@@ -15,7 +15,7 @@ const http = axios.create({
 // Request interceptor
 http.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("admin_token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -31,7 +31,8 @@ http.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem("token");
+      localStorage.removeItem("admin_token");
+      window.location.href = "/login";
     }
 
     return Promise.reject(error);
@@ -40,70 +41,58 @@ http.interceptors.response.use(
 
 export default http;
 
-// Feature API modules
-export const usersAPI = {
-  getAll: (params) => http.get("/users", { params }),
-  getById: (id) => http.get(`/users/${id}`),
-  create: (data) => http.post("/users", data),
-  update: (id, data) => http.put(`/users/${id}`, data),
-  delete: (id) => http.delete(`/users/${id}`),
-  resetPassword: (id, data) => http.patch(`/users/${id}/reset-password`, data),
-  exportUsers: (params) =>
-    http.get("/users/export", { params, responseType: "blob" }),
+// ============ API Modules ============
+
+export const authAPI = {
+  login: (data) => http.post("/api/auth/admin/login", data),
+  getMe: () => http.get("/api/auth/me"),
 };
 
-export const classesAPI = {
-  getAll: (params) => http.get("/classes", { params }),
-  getById: (id) => http.get(`/classes/${id}`),
-  create: (data) => http.post("/classes", data),
-  update: (id, data) => http.put(`/classes/${id}`, data),
-  delete: (id) => http.delete(`/classes/${id}`),
+export const adminsAPI = {
+  getAll: () => http.get("/api/admins"),
+  create: (data) => http.post("/api/admins", data),
+  update: (id, data) => http.put(`/api/admins/${id}`, data),
+  delete: (id) => http.delete(`/api/admins/${id}`),
+  setRegion: (id, data) => http.put(`/api/admins/${id}/region`, data),
 };
 
-export const subjectsAPI = {
-  getAll: (params) => http.get("/subjects", { params }),
-  getById: (id) => http.get(`/subjects/${id}`),
-  create: (data) => http.post("/subjects", data),
-  update: (id, data) => http.put(`/subjects/${id}`, data),
-  delete: (id) => http.delete(`/subjects/${id}`),
+export const regionsAPI = {
+  getAll: (params) => http.get("/api/regions", { params }),
+  getById: (id) => http.get(`/api/regions/${id}`),
+  create: (data) => http.post("/api/regions", data),
+  update: (id, data) => http.put(`/api/regions/${id}`, data),
+  delete: (id) => http.delete(`/api/regions/${id}`),
 };
 
-export const gradesAPI = {
-  getAll: (params) => http.get("/grades", { params }),
-  create: (data) => http.post("/grades", data),
-  getMissing: (params) => http.get("/grades/missing", { params }),
-  getMyGrades: (params) => http.get("/grades/my", { params }),
+export const requestsAPI = {
+  getAll: (params) => http.get("/api/requests", { params }),
+  getStats: (params) => http.get("/api/requests/stats", { params }),
+  updateStatus: (id, data) => http.put(`/api/requests/${id}/status`, data),
 };
 
-export const schedulesAPI = {
-  getAll: (params) => http.get("/schedules", { params }),
-  create: (data) => http.post("/schedules", data),
-  update: (id, data) => http.put(`/schedules/${id}`, data),
-  delete: (id) => http.delete(`/schedules/${id}`),
+export const servicesAPI = {
+  getAll: () => http.get("/api/services"),
+  create: (data) => http.post("/api/services", data),
+  update: (id, data) => http.put(`/api/services/${id}`, data),
+  delete: (id) => http.delete(`/api/services/${id}`),
 };
 
-export const messagesAPI = {
-  getAll: (params) => http.get("/messages", { params }),
-  getById: (id) => http.get(`/messages/${id}`),
-  send: (data) => http.post("/messages", data),
-  getMyMessages: (params) => http.get("/messages/my", { params }),
+export const serviceReportsAPI = {
+  getAll: (params) => http.get("/api/service-reports", { params }),
+  updateStatus: (id, data) => http.put(`/api/service-reports/${id}/status`, data),
+  getStats: (params) => http.get("/api/service-reports/stats", { params }),
 };
 
-export const holidaysAPI = {
-  getAll: (params) => http.get("/holidays", { params }),
-  create: (data) => http.post("/holidays", data),
-  delete: (id) => http.delete(`/holidays/${id}`),
-  checkToday: () => http.get("/holidays/check-today"),
+export const mskAPI = {
+  getCategories: () => http.get("/api/msk/categories"),
+  createCategory: (data) => http.post("/api/msk/categories", data),
+  updateCategory: (id, data) => http.put(`/api/msk/categories/${id}`, data),
+  deleteCategory: (id) => http.delete(`/api/msk/categories/${id}`),
+  getAllOrders: (params) => http.get("/api/msk/orders", { params }),
+  updateOrderStatus: (id, data) => http.put(`/api/msk/orders/${id}/status`, data),
 };
 
-export const topicsAPI = {
-  getAll: (params) => http.get("/topics", { params }),
-  upload: (data) => http.post("/topics/upload", data),
-  getBySubject: (subjectId, params) =>
-    http.get(`/subjects/${subjectId}/topics`, { params }),
-};
-
-export const statisticsAPI = {
-  getDashboard: () => http.get("/statistics/dashboard"),
-  getStudentStats: (id) => http.get(`/statistics/students/${id}`),
+export const statsAPI = {
+  getDashboard: () => http.get("/api/stats/dashboard"),
+  getByRegion: (params) => http.get("/api/stats/by-region", { params }),
 };
