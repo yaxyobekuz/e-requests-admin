@@ -17,6 +17,9 @@ const initialState = {
   mskOrderDetail: initialModalData,
   createRegion: initialModalData,
   editRegion: initialModalData,
+  serviceReportDetail: initialModalData,
+  createRequestType: initialModalData,
+  editRequestType: initialModalData,
 };
 
 export const modalSlice = createSlice({
