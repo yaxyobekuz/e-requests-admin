@@ -1,15 +1,16 @@
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { serviceReportsAPI, servicesAPI } from "@/shared/api/http";
 import { SERVICE_REPORT_STATUSES } from "@/shared/data/request-statuses";
-import { CheckCircle, Clock, XCircle } from "lucide-react";
+import ModalWrapper from "@/shared/components/ui/ModalWrapper";
+import { useDispatch } from "react-redux";
+import { open } from "@/features/modal/store/modal.slice";
+import { formatUzDate } from "@/shared/utils/formatDate";
 
 const ServiceReportsPage = () => {
-  const queryClient = useQueryClient();
+  const dispatch = useDispatch();
   const [filters, setFilters] = useState({ serviceId: "", status: "", page: 1 });
-  const [rejectModal, setRejectModal] = useState({ open: false, reportId: null });
-  const [rejectionReason, setRejectionReason] = useState("");
 
   const { data: services = [] } = useQuery({
     queryKey: ["services"],
@@ -23,41 +24,8 @@ const ServiceReportsPage = () => {
 
   const reports = data?.data || [];
 
-  const statusMutation = useMutation({
-    mutationFn: ({ id, data }) => serviceReportsAPI.updateStatus(id, data),
-    onSuccess: (_, { data }) => {
-      queryClient.invalidateQueries({ queryKey: ["admin-service-reports"] });
-      const messages = {
-        in_progress: "Jarayonga olindi!",
-        pending_confirmation: "Mavjud deb belgilandi, foydalanuvchi tasdiqlashi kutilmoqda!",
-        rejected: "Rad etildi!",
-      };
-      toast.success(messages[data.status] || "Status yangilandi!");
-      setRejectModal({ open: false, reportId: null });
-      setRejectionReason("");
-    },
-    onError: (err) => {
-      toast.error(err.response?.data?.message || "Xatolik yuz berdi");
-    },
-  });
-
-  const handleUpdateStatus = (reportId, status) => {
-    if (status === "rejected") {
-      setRejectModal({ open: true, reportId });
-      return;
-    }
-    statusMutation.mutate({ id: reportId, data: { status } });
-  };
-
-  const handleReject = () => {
-    if (!rejectionReason.trim()) {
-      toast.error("Rad etish sababini kiriting");
-      return;
-    }
-    statusMutation.mutate({
-      id: rejectModal.reportId,
-      data: { status: "rejected", rejectionReason: rejectionReason.trim() },
-    });
+  const handleOpenDetail = (report) => {
+    dispatch(open({ modal: "serviceReportDetail", data: report }));
   };
 
   return (
@@ -104,91 +72,28 @@ const ServiceReportsPage = () => {
               return (
                 <tr key={report._id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 text-sm font-medium">{report.service?.name}</td>
-                  <td className="px-4 py-3 text-sm">{report.user?.firstName} — {report.user?.phone}</td>
+                  <td className="px-4 py-3 text-sm">{report.user?.firstName}</td>
                   <td className="px-4 py-3 text-sm text-gray-500">
                     {[
                       report.address?.region?.name,
                       report.address?.district?.name,
-                      report.address?.neighborhood?.name,
                     ].filter(Boolean).join(", ")}
                   </td>
                   <td className="px-4 py-3">
                     <span className={`text-xs px-2 py-0.5 rounded-full ${status.color}`}>
                       {status.label}
                     </span>
-                    {report.status === "rejected" && report.rejectionReason && (
-                      <p className="text-xs text-red-500 mt-1 max-w-[200px] truncate" title={report.rejectionReason}>
-                        {report.rejectionReason}
-                      </p>
-                    )}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-500">
-                    {new Date(report.createdAt).toLocaleDateString("uz-UZ")}
+                    {formatUzDate(report.createdAt)}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <div className="flex items-center justify-end gap-1.5">
-                      {/* Unavailable → 3 ta tugma */}
-                      {report.status === "unavailable" && (
-                        <>
-                          <button
-                            onClick={() => handleUpdateStatus(report._id, "in_progress")}
-                            disabled={statusMutation.isPending}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 text-xs bg-yellow-500 text-white rounded-lg hover:bg-yellow-600"
-                          >
-                            <Clock className="w-3 h-3" />
-                            Jarayonda
-                          </button>
-                          <button
-                            onClick={() => handleUpdateStatus(report._id, "pending_confirmation")}
-                            disabled={statusMutation.isPending}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 text-xs bg-green-600 text-white rounded-lg hover:bg-green-700"
-                          >
-                            <CheckCircle className="w-3 h-3" />
-                            Mavjud
-                          </button>
-                          <button
-                            onClick={() => handleUpdateStatus(report._id, "rejected")}
-                            disabled={statusMutation.isPending}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 text-xs bg-red-600 text-white rounded-lg hover:bg-red-700"
-                          >
-                            <XCircle className="w-3 h-3" />
-                            Rad etish
-                          </button>
-                        </>
-                      )}
-
-                      {/* In progress → 2 ta tugma */}
-                      {report.status === "in_progress" && (
-                        <>
-                          <button
-                            onClick={() => handleUpdateStatus(report._id, "pending_confirmation")}
-                            disabled={statusMutation.isPending}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 text-xs bg-green-600 text-white rounded-lg hover:bg-green-700"
-                          >
-                            <CheckCircle className="w-3 h-3" />
-                            Mavjud
-                          </button>
-                          <button
-                            onClick={() => handleUpdateStatus(report._id, "rejected")}
-                            disabled={statusMutation.isPending}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 text-xs bg-red-600 text-white rounded-lg hover:bg-red-700"
-                          >
-                            <XCircle className="w-3 h-3" />
-                            Rad etish
-                          </button>
-                        </>
-                      )}
-
-                      {/* Pending confirmation — kutish */}
-                      {report.status === "pending_confirmation" && (
-                        <span className="text-xs text-blue-600">Foydalanuvchi tasdiqlashi kutilmoqda</span>
-                      )}
-
-                      {/* Confirmed / Rejected — hech narsa */}
-                      {(report.status === "confirmed" || report.status === "rejected") && (
-                        <span className="text-xs text-gray-400">Yakunlangan</span>
-                      )}
-                    </div>
+                    <button
+                      onClick={() => handleOpenDetail(report)}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    >
+                      Batafsil
+                    </button>
                   </td>
                 </tr>
               );
@@ -219,37 +124,162 @@ const ServiceReportsPage = () => {
         </div>
       )}
 
-      {/* Rad etish modali */}
-      {rejectModal.open && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4 space-y-4">
-            <h3 className="text-lg font-bold">Rad etish sababi</h3>
-            <textarea
-              value={rejectionReason}
-              onChange={(e) => setRejectionReason(e.target.value)}
-              placeholder="Rad etish sababini yozing..."
-              rows={3}
-              className="w-full px-3 py-2 border rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-red-500"
-            />
-            <div className="flex gap-2 justify-end">
-              <button
-                onClick={() => {
-                  setRejectModal({ open: false, reportId: null });
-                  setRejectionReason("");
-                }}
-                className="px-4 py-2 text-sm border rounded-lg hover:bg-gray-50"
-              >
-                Bekor qilish
-              </button>
-              <button
-                onClick={handleReject}
-                disabled={statusMutation.isPending}
-                className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
-              >
-                {statusMutation.isPending ? "Yuborilmoqda..." : "Rad etish"}
-              </button>
-            </div>
+      <ModalWrapper
+        name="serviceReportDetail"
+        title="Servis reporti"
+        description="Ba'atafsil ma'lumot va status boshqaruvi"
+        className="max-w-lg"
+      >
+        <ServiceReportDetailForm />
+      </ModalWrapper>
+    </div>
+  );
+};
+
+const ServiceReportDetailForm = ({ _id, service, user, address, status, cancelReason, createdAt, close, isLoading, setIsLoading }) => {
+  const queryClient = useQueryClient();
+  const [newStatus, setNewStatus] = useState(status || "");
+  const [reason, setReason] = useState("");
+
+  useEffect(() => {
+    setNewStatus(status || "");
+    setReason("");
+  }, [status, _id]);
+
+  const statusOptions = status === "unavailable"
+    ? ["in_progress", "pending_confirmation", "rejected"]
+    : status === "in_progress"
+      ? ["pending_confirmation", "rejected"]
+      : [];
+
+  const handleUpdateStatus = async () => {
+    if (!newStatus || newStatus === status) return;
+    if (newStatus === "rejected" && !reason.trim()) {
+      return toast.error("Rad etish sababini kiriting");
+    }
+
+    setIsLoading(true);
+    try {
+      await serviceReportsAPI.updateStatus(_id, {
+        status: newStatus,
+        ...(newStatus === "rejected" ? { rejectionReason: reason.trim() } : {}),
+      });
+      queryClient.invalidateQueries({ queryKey: ["admin-service-reports"] });
+      const messages = {
+        in_progress: "Jarayonga olindi!",
+        pending_confirmation: "Mavjud deb belgilandi, foydalanuvchi tasdiqlashi kutilmoqda!",
+        rejected: "Rad etildi!",
+      };
+      toast.success(messages[newStatus] || "Status yangilandi!");
+      close();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Xatolik yuz berdi");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const addressLabel = [
+    address?.region?.name,
+    address?.district?.name,
+    address?.neighborhood?.name || address?.neighborhoodCustom,
+    address?.street?.name || address?.streetCustom,
+  ].filter(Boolean).join(", ");
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+        <div className="border rounded-lg p-3">
+          <p className="text-xs text-gray-500">Servis</p>
+          <p className="font-medium">{service?.name || "-"}</p>
+        </div>
+        <div className="border rounded-lg p-3">
+          <p className="text-xs text-gray-500">Fuqaro</p>
+          <p className="font-medium">{user?.firstName || "-"}</p>
+        </div>
+        <div className="border rounded-lg p-3">
+          <p className="text-xs text-gray-500">Telefon</p>
+          <p className="font-medium">{user?.phone || "-"}</p>
+        </div>
+        <div className="border rounded-lg p-3">
+          <p className="text-xs text-gray-500">Hudud</p>
+          <p className="font-medium">{addressLabel || "-"}</p>
+        </div>
+        <div className="border rounded-lg p-3">
+          <p className="text-xs text-gray-500">Sana</p>
+          <p className="font-medium">{formatUzDate(createdAt)}</p>
+        </div>
+        <div className="border rounded-lg p-3">
+          <p className="text-xs text-gray-500">Status</p>
+          <p className="font-medium">
+            {SERVICE_REPORT_STATUSES[status]?.label || "-"}
+          </p>
+        </div>
+      </div>
+
+      {status === "pending_confirmation" && (
+        <div className="text-sm text-blue-600">
+          Foydalanuvchi tasdiqlashi kutilmoqda
+        </div>
+      )}
+
+      {status === "cancelled" && (
+        <div className="text-sm text-gray-500">
+          Foydalanuvchi tomonidan bekor qilingan
+        </div>
+      )}
+
+      {cancelReason && (
+        <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-700">
+          <span className="font-medium">Bekor qilish sababi: </span>{cancelReason}
+        </div>
+      )}
+
+      {(status === "confirmed" || status === "rejected") && (
+        <div className="text-sm text-gray-400">Yakunlangan</div>
+      )}
+
+      {statusOptions.length > 0 && (
+        <div className="space-y-3">
+          <div>
+            <label className="block text-sm font-medium mb-1">Statusni o'zgartirish</label>
+            <select
+              value={newStatus}
+              onChange={(e) => {
+                setNewStatus(e.target.value);
+                if (e.target.value !== "rejected") setReason("");
+              }}
+              className="w-full px-3 py-2 border rounded-lg text-sm"
+            >
+              <option value={status}>{SERVICE_REPORT_STATUSES[status]?.label || status}</option>
+              {statusOptions.map((option) => (
+                <option key={option} value={option}>
+                  {SERVICE_REPORT_STATUSES[option]?.label || option}
+                </option>
+              ))}
+            </select>
           </div>
+
+          {newStatus === "rejected" && (
+            <div>
+              <label className="block text-sm font-medium mb-1">Rad etish sababi *</label>
+              <textarea
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                rows={3}
+                className="w-full px-3 py-2 border rounded-lg text-sm resize-none"
+                placeholder="Rad etish sababini yozing..."
+              />
+            </div>
+          )}
+
+          <button
+            onClick={handleUpdateStatus}
+            disabled={isLoading || newStatus === status}
+            className="w-full py-2.5 bg-blue-600 text-white rounded-lg font-medium disabled:opacity-50"
+          >
+            {isLoading ? "Saqlanmoqda..." : "Statusni yangilash"}
+          </button>
         </div>
       )}
     </div>
