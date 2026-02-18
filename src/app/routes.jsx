@@ -2,11 +2,13 @@
 import LoginPage from "@/features/auth/pages/LoginPage";
 import DashboardPage from "@/features/dashboard/pages/DashboardPage";
 import AdminsPage from "@/features/admin-management/pages/AdminsPage";
+import AdminDetailPage from "@/features/admin-management/pages/AdminDetailPage";
 import RequestsListPage from "@/features/requests/pages/RequestsListPage";
 import ServicesPage from "@/features/services/pages/ServicesPage";
 import ServiceReportsPage from "@/features/services/pages/ServiceReportsPage";
 import MskCategoriesPage from "@/features/msk/pages/MskCategoriesPage";
 import MskOrdersPage from "@/features/msk/pages/MskOrdersPage";
+import RequestTypesPage from "@/features/request-types/pages/RequestTypesPage";
 import RegionsPage from "@/features/regions/pages/RegionsPage";
 import DistrictsPage from "@/features/regions/pages/DistrictsPage";
 import NeighborhoodsPage from "@/features/regions/pages/NeighborhoodsPage";
@@ -38,7 +40,9 @@ const Routes = () => {
           <Route path="/service-reports" element={<ServiceReportsPage />} />
           <Route path="/msk/orders" element={<MskOrdersPage />} />
           <Route path="/admins" element={<AdminsPage />} />
+          <Route path="/admins/:id" element={<AdminDetailPage />} />
           <Route path="/services" element={<ServicesPage />} />
+          <Route path="/request-types" element={<RequestTypesPage />} />
           <Route path="/msk/categories" element={<MskCategoriesPage />} />
           <Route path="/regions" element={<RegionsPage />} />
           <Route path="/regions/:regionId/districts" element={<DistrictsPage />} />
