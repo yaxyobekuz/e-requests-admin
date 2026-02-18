@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { requestsAPI } from "@/shared/api/http";
+import { requestsAPI, requestTypesAPI } from "@/shared/api/http";
 import { requestCategories } from "@/shared/data/request-categories";
 import { REQUEST_STATUSES } from "@/shared/data/request-statuses";
 import ModalWrapper from "@/shared/components/ui/ModalWrapper";
 import { useDispatch } from "react-redux";
 import { open } from "@/features/modal/store/modal.slice";
-import { Eye } from "lucide-react";
+import { formatUzDate } from "@/shared/utils/formatDate";
 
 const RequestsListPage = () => {
   const queryClient = useQueryClient();
@@ -15,12 +15,18 @@ const RequestsListPage = () => {
   const [filters, setFilters] = useState({
     status: "",
     category: "",
+    type: "",
     page: 1,
   });
 
   const { data, isLoading } = useQuery({
     queryKey: ["admin-requests", filters],
     queryFn: () => requestsAPI.getAll(filters).then((res) => res.data),
+  });
+
+  const { data: requestTypes = [] } = useQuery({
+    queryKey: ["request-types"],
+    queryFn: () => requestTypesAPI.getAll().then((res) => res.data),
   });
 
   const requests = data?.data || [];
@@ -58,14 +64,24 @@ const RequestsListPage = () => {
             <option key={c.id} value={c.id}>{c.label}</option>
           ))}
         </select>
+        <select
+          value={filters.type}
+          onChange={(e) => setFilters((p) => ({ ...p, type: e.target.value, page: 1 }))}
+          className="px-3 py-2 border rounded-lg text-sm"
+        >
+          <option value="">Barcha turlar</option>
+          {requestTypes.map((t) => (
+            <option key={t._id} value={t._id}>{t.name}</option>
+          ))}
+        </select>
       </div>
 
       <div className="bg-white rounded-xl border overflow-hidden">
         <table className="w-full">
           <thead className="bg-gray-50 border-b">
             <tr>
-              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Murojaat</th>
               <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Bo'lim</th>
+              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Turi</th>
               <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Fuqaro</th>
               <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Hudud</th>
               <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Status</th>
@@ -78,9 +94,9 @@ const RequestsListPage = () => {
               const status = REQUEST_STATUSES[req.status] || {};
               return (
                 <tr key={req._id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 text-sm max-w-xs truncate">{req.description}</td>
                   <td className="px-4 py-3 text-sm">{getCategoryLabel(req.category)}</td>
-                  <td className="px-4 py-3 text-sm">{req.user?.firstName} — {req.contactPhone}</td>
+                  <td className="px-4 py-3 text-sm text-gray-500">{req.type?.name || "—"}</td>
+                  <td className="px-4 py-3 text-sm">{req.user?.firstName}</td>
                   <td className="px-4 py-3 text-sm text-gray-500">
                     {req.address?.region?.name}, {req.address?.district?.name}
                   </td>
@@ -90,14 +106,14 @@ const RequestsListPage = () => {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-500">
-                    {new Date(req.createdAt).toLocaleDateString("uz-UZ")}
+                    {formatUzDate(req.createdAt)}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <button
                       onClick={() => dispatch(open({ modal: "requestDetail", data: req }))}
-                      className="p-1.5 text-gray-400 hover:text-blue-600"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                     >
-                      <Eye className="w-4 h-4" />
+                      Batafsil
                     </button>
                   </td>
                 </tr>
@@ -132,11 +148,17 @@ const RequestsListPage = () => {
   );
 };
 
-const RequestDetailForm = ({ _id, description, category, contactFirstName, contactLastName, contactPhone, status, rejectionReason, address, user, close, isLoading, setIsLoading }) => {
+const RequestDetailForm = ({ _id, description, category, contactFirstName, contactLastName, contactPhone, status, rejectionReason, cancelReason, address, user, type, close, isLoading, setIsLoading }) => {
   const queryClient = useQueryClient();
   const [newStatus, setNewStatus] = useState(status || "");
+  const [newType, setNewType] = useState(type?._id || "");
   const [reason, setReason] = useState("");
   const [note, setNote] = useState("");
+
+  const { data: requestTypes = [] } = useQuery({
+    queryKey: ["request-types"],
+    queryFn: () => requestTypesAPI.getAll().then((res) => res.data),
+  });
 
   const getCategoryLabel = (id) =>
     requestCategories.find((c) => c.id === id)?.label || id;
@@ -151,6 +173,7 @@ const RequestDetailForm = ({ _id, description, category, contactFirstName, conta
         status: newStatus,
         rejectionReason: reason,
         closingNote: note,
+        type: newType || null,
       });
       queryClient.invalidateQueries({ queryKey: ["admin-requests"] });
       toast.success("Status yangilandi!");
@@ -194,8 +217,25 @@ const RequestDetailForm = ({ _id, description, category, contactFirstName, conta
         </div>
       )}
 
-      {status !== "resolved" && status !== "rejected" && (
+      {cancelReason && (
+        <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-700">
+          <span className="font-medium">Bekor qilish sababi: </span>{cancelReason}
+        </div>
+      )}
+
+      {status !== "resolved" && status !== "rejected" && status !== "cancelled" && (
         <>
+          <div>
+            <label className="block text-sm font-medium mb-1">Murojaat turi</label>
+            <select value={newType} onChange={(e) => setNewType(e.target.value)}
+              className="w-full px-3 py-2 border rounded-lg text-sm">
+              <option value="">Tanlanmagan</option>
+              {requestTypes.map((t) => (
+                <option key={t._id} value={t._id}>{t.name}</option>
+              ))}
+            </select>
+          </div>
+
           <div>
             <label className="block text-sm font-medium mb-1">Statusni o'zgartirish</label>
             <select value={newStatus} onChange={(e) => setNewStatus(e.target.value)}
@@ -224,9 +264,9 @@ const RequestDetailForm = ({ _id, description, category, contactFirstName, conta
             </div>
           )}
 
-          <button onClick={handleUpdateStatus} disabled={isLoading || newStatus === status}
+          <button onClick={handleUpdateStatus} disabled={isLoading || (newStatus === status && newType === (type?._id || ""))}
             className="w-full py-2.5 bg-blue-600 text-white rounded-lg font-medium disabled:opacity-50">
-            {isLoading ? "Saqlanmoqda..." : "Statusni yangilash"}
+            {isLoading ? "Saqlanmoqda..." : "Saqlash"}
           </button>
         </>
       )}
