@@ -10,6 +10,7 @@ import {
   LogOut,
   FolderKanban,
   ChartBar,
+  Tags,
 } from "lucide-react";
 import { logo } from "@/shared/assets/images";
 
@@ -30,27 +31,35 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("admin_user") || "{}");
   const isOwner = user.role === "owner";
+  const permissions = user.permissions || {};
+
+  const hasModuleAccess = (module) => {
+    if (isOwner) return true;
+    if (user.role !== "admin") return false;
+    return permissions[module]?.access !== "off";
+  };
 
   const navItems = [
     { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, show: true },
     { to: "/statistics", label: "Statistika", icon: ChartBar, show: true },
     { isDivider: true, show: true },
-    { to: "/requests", label: "Murojaatlar", icon: FileText, show: true },
+    { to: "/requests", label: "Murojaatlar", icon: FileText, show: hasModuleAccess("requests") },
     {
       to: "/service-reports",
       label: "Servis reportlar",
       icon: AlertTriangle,
-      show: true,
+      show: hasModuleAccess("services"),
     },
     {
       to: "/msk/orders",
       label: "MSK buyurtmalar",
       icon: FolderKanban,
-      show: true,
+      show: hasModuleAccess("msk"),
     },
     { isDivider: true, show: true },
     { to: "/admins", label: "Adminlar", icon: Users, show: isOwner },
     { to: "/services", label: "Servislar", icon: Settings, show: isOwner },
+    { to: "/request-types", label: "Murojaat turlari", icon: Tags, show: isOwner },
     {
       to: "/msk/categories",
       label: "MSK kategoriyalar",
@@ -82,10 +91,10 @@ const Sidebar = () => {
       <nav className="flex-1 p-3 space-y-1">
         {navItems
           .filter((item) => item.show)
-          .map((item) => {
+          .map((item, idx) => {
             if (item.isDivider) {
               return (
-                <hr key={item.to} className="mx-2 border-t border-gray-200" />
+                <hr key={`divider-${idx}`} className="mx-2 border-t border-gray-200" />
               );
             }
             return (
