@@ -50,10 +50,12 @@ export const authAPI = {
 
 export const adminsAPI = {
   getAll: () => http.get("/api/admins"),
+  getById: (id) => http.get(`/api/admins/${id}`),
   create: (data) => http.post("/api/admins", data),
   update: (id, data) => http.put(`/api/admins/${id}`, data),
   delete: (id) => http.delete(`/api/admins/${id}`),
   setRegion: (id, data) => http.put(`/api/admins/${id}/region`, data),
+  updatePermissions: (id, data) => http.put(`/api/admins/${id}/permissions`, data),
 };
 
 export const regionsAPI = {
@@ -68,6 +70,13 @@ export const requestsAPI = {
   getAll: (params) => http.get("/api/requests", { params }),
   getStats: (params) => http.get("/api/requests/stats", { params }),
   updateStatus: (id, data) => http.put(`/api/requests/${id}/status`, data),
+};
+
+export const requestTypesAPI = {
+  getAll: () => http.get("/api/request-types"),
+  create: (data) => http.post("/api/request-types", data),
+  update: (id, data) => http.put(`/api/request-types/${id}`, data),
+  delete: (id) => http.delete(`/api/request-types/${id}`),
 };
 
 export const servicesAPI = {
