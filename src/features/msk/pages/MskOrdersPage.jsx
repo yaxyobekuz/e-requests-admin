@@ -6,7 +6,7 @@ import { MSK_ORDER_STATUSES } from "@/shared/data/request-statuses";
 import ModalWrapper from "@/shared/components/ui/ModalWrapper";
 import { useDispatch } from "react-redux";
 import { open } from "@/features/modal/store/modal.slice";
-import { Eye } from "lucide-react";
+import { formatUzDate } from "@/shared/utils/formatDate";
 
 const MskOrdersPage = () => {
   const dispatch = useDispatch();
@@ -47,7 +47,6 @@ const MskOrdersPage = () => {
           <thead className="bg-gray-50 border-b">
             <tr>
               <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Kategoriya</th>
-              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Tavsif</th>
               <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Fuqaro</th>
               <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Hudud</th>
               <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Status</th>
@@ -61,8 +60,7 @@ const MskOrdersPage = () => {
               return (
                 <tr key={order._id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 text-sm font-medium">{order.category?.name}</td>
-                  <td className="px-4 py-3 text-sm max-w-xs truncate">{order.description}</td>
-                  <td className="px-4 py-3 text-sm">{order.contactFirstName} {order.contactLastName} — {order.contactPhone}</td>
+                  <td className="px-4 py-3 text-sm">{order.contactFirstName} {order.contactLastName}</td>
                   <td className="px-4 py-3 text-sm text-gray-500">
                     {order.address?.region?.name}, {order.address?.district?.name}
                   </td>
@@ -72,12 +70,14 @@ const MskOrdersPage = () => {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-500">
-                    {new Date(order.createdAt).toLocaleDateString("uz-UZ")}
+                    {formatUzDate(order.createdAt)}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <button onClick={() => dispatch(open({ modal: "mskOrderDetail", data: order }))}
-                      className="p-1.5 text-gray-400 hover:text-blue-600">
-                      <Eye className="w-4 h-4" />
+                    <button
+                      onClick={() => dispatch(open({ modal: "mskOrderDetail", data: order }))}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    >
+                      Batafsil
                     </button>
                   </td>
                 </tr>
@@ -97,7 +97,7 @@ const MskOrdersPage = () => {
   );
 };
 
-const MskOrderDetailForm = ({ _id, description, category, status, address, user, contactFirstName, contactLastName, contactPhone, rejectionReason, close, isLoading, setIsLoading }) => {
+const MskOrderDetailForm = ({ _id, description, category, status, address, user, contactFirstName, contactLastName, contactPhone, rejectionReason, cancelReason, close, isLoading, setIsLoading }) => {
   const queryClient = useQueryClient();
   const [newStatus, setNewStatus] = useState(status || "");
   const [reason, setReason] = useState("");
@@ -151,7 +151,13 @@ const MskOrderDetailForm = ({ _id, description, category, status, address, user,
         </div>
       )}
 
-      {status !== "confirmed" && status !== "rejected" && (
+      {cancelReason && (
+        <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-700">
+          <span className="font-medium">Bekor qilish sababi: </span>{cancelReason}
+        </div>
+      )}
+
+      {status !== "confirmed" && status !== "rejected" && status !== "cancelled" && (
         <>
           <div>
             <label className="block text-sm font-medium mb-1">Statusni o'zgartirish</label>
