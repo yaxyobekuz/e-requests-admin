@@ -41,7 +41,7 @@ const Sidebar = () => {
 
   const navItems = [
     { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, show: true },
-    { to: "/statistics", label: "Statistika", icon: ChartBar, show: true },
+    // { to: "/statistics", label: "Statistika", icon: ChartBar, show: true },
     { isDivider: true, show: true },
     { to: "/requests", label: "Murojaatlar", icon: FileText, show: hasModuleAccess("requests") },
     {

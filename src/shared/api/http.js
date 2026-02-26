@@ -104,4 +104,7 @@ export const mskAPI = {
 export const statsAPI = {
   getDashboard: () => http.get("/api/stats/dashboard"),
   getByRegion: (params) => http.get("/api/stats/by-region", { params }),
+  getComprehensive: () => http.get("/api/stats/comprehensive"),
+  getTrends: (params) => http.get("/api/stats/trends", { params }),
+  getRegionalDetailed: (params) => http.get("/api/stats/by-region/detailed", { params }),
 };
