@@ -446,9 +446,9 @@ const PermissionsTab = ({ admin }) => {
         itemLabel="Murojaat turlari"
       />
 
-      {/* Servis reportlar */}
+      {/* Xizmat arizalari */}
       <ModulePermissionCard
-        title="Servis reportlar"
+        title="Xizmat arizalari"
         access={permissions.services.access}
         onAccessChange={(val) =>
           setPermissions((p) => ({ ...p, services: { ...p.services, access: val } }))
