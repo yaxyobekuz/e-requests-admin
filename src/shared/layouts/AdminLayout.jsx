@@ -20,7 +20,7 @@ const AdminLayout = () => {
       <Sidebar />
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 min-h-screen">
         <Outlet />
       </main>
     </div>
@@ -43,10 +43,15 @@ const Sidebar = () => {
     { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, show: true },
     { to: "/statistics", label: "Statistika", icon: ChartBar, show: true },
     { isDivider: true, show: true },
-    { to: "/requests", label: "Murojaatlar", icon: FileText, show: hasModuleAccess("requests") },
+    {
+      to: "/requests",
+      label: "Murojaatlar",
+      icon: FileText,
+      show: hasModuleAccess("requests"),
+    },
     {
       to: "/service-reports",
-      label: "Servis reportlar",
+      label: "Xizmat arizalari",
       icon: AlertTriangle,
       show: hasModuleAccess("services"),
     },
@@ -59,7 +64,12 @@ const Sidebar = () => {
     { isDivider: true, show: true },
     { to: "/admins", label: "Adminlar", icon: Users, show: isOwner },
     { to: "/services", label: "Servislar", icon: Settings, show: isOwner },
-    { to: "/request-types", label: "Murojaat turlari", icon: Tags, show: isOwner },
+    {
+      to: "/request-types",
+      label: "Murojaat turlari",
+      icon: Tags,
+      show: isOwner,
+    },
     {
       to: "/msk/categories",
       label: "MSK kategoriyalar",
@@ -94,7 +104,10 @@ const Sidebar = () => {
           .map((item, idx) => {
             if (item.isDivider) {
               return (
-                <hr key={`divider-${idx}`} className="mx-2 border-t border-gray-200" />
+                <hr
+                  key={`divider-${idx}`}
+                  className="mx-2 border-t border-gray-200"
+                />
               );
             }
             return (
