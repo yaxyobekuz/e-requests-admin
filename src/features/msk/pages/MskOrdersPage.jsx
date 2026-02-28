@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { mskAPI } from "@/shared/api/http";
 import { MSK_ORDER_STATUSES } from "@/shared/data/request-statuses";
@@ -7,15 +7,26 @@ import ModalWrapper from "@/shared/components/ui/ModalWrapper";
 import { useDispatch } from "react-redux";
 import { open } from "@/features/modal/store/modal.slice";
 import { formatUzDate } from "@/shared/utils/formatDate";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/shadcn/select";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationButton,
+  PaginationPrevious,
+  PaginationNext,
+  PaginationEllipsis,
+} from "@/shared/components/shadcn/pagination";
 
 const MskOrdersPage = () => {
   const dispatch = useDispatch();
   const [filters, setFilters] = useState({ status: "", page: 1 });
-
-  const { data: categories = [] } = useQuery({
-    queryKey: ["msk", "categories"],
-    queryFn: () => mskAPI.getCategories().then((res) => res.data),
-  });
 
   const { data, isLoading } = useQuery({
     queryKey: ["admin-msk-orders", filters],
@@ -28,30 +39,55 @@ const MskOrdersPage = () => {
     <div className="p-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold">MSK buyurtmalar</h1>
-        <p className="text-sm text-gray-500">Barcha maishiy xizmat buyurtmalari</p>
       </div>
 
       <div className="flex gap-3 mb-4">
-        <select value={filters.status}
-          onChange={(e) => setFilters((p) => ({ ...p, status: e.target.value, page: 1 }))}
-          className="px-3 py-2 border rounded-lg text-sm">
-          <option value="">Barcha statuslar</option>
-          {Object.entries(MSK_ORDER_STATUSES).map(([key, val]) => (
-            <option key={key} value={key}>{val.label}</option>
-          ))}
-        </select>
+        <Select
+          value={filters.status || "all"}
+          onValueChange={(val) =>
+            setFilters((p) => ({
+              ...p,
+              status: val === "all" ? "" : val,
+              page: 1,
+            }))
+          }
+        >
+          <SelectTrigger className="w-48 border rounded-lg text-sm bg-white">
+            <SelectValue placeholder="Barcha statuslar" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Barcha statuslar</SelectItem>
+            {Object.entries(MSK_ORDER_STATUSES).map(([key, val]) => (
+              <SelectItem key={key} value={key}>
+                {val.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="bg-white rounded-xl border overflow-hidden">
         <table className="w-full">
           <thead className="bg-gray-50 border-b">
             <tr>
-              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Kategoriya</th>
-              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Fuqaro</th>
-              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Hudud</th>
-              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Status</th>
-              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Sana</th>
-              <th className="text-right px-4 py-3 text-sm font-medium text-gray-500">Amal</th>
+              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">
+                Kategoriya
+              </th>
+              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">
+                Fuqaro
+              </th>
+              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">
+                Hudud
+              </th>
+              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">
+                Status
+              </th>
+              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">
+                Sana
+              </th>
+              <th className="text-right px-4 py-3 text-sm font-medium text-gray-500">
+                Amal
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y">
@@ -59,13 +95,20 @@ const MskOrdersPage = () => {
               const status = MSK_ORDER_STATUSES[order.status] || {};
               return (
                 <tr key={order._id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 text-sm font-medium">{order.category?.name}</td>
-                  <td className="px-4 py-3 text-sm">{order.contactFirstName} {order.contactLastName}</td>
+                  <td className="px-4 py-3 text-sm font-medium">
+                    {order.category?.name}
+                  </td>
+                  <td className="px-4 py-3 text-sm">
+                    {order.contactFirstName} {order.contactLastName}
+                  </td>
                   <td className="px-4 py-3 text-sm text-gray-500">
-                    {order.address?.region?.name}, {order.address?.district?.name}
+                    {order.address?.region?.name},{" "}
+                    {order.address?.district?.name}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${status.color}`}>
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-full ${status.color}`}
+                    >
                       {status.label}
                     </span>
                   </td>
@@ -74,7 +117,9 @@ const MskOrdersPage = () => {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <button
-                      onClick={() => dispatch(open({ modal: "mskOrderDetail", data: order }))}
+                      onClick={() =>
+                        dispatch(open({ modal: "mskOrderDetail", data: order }))
+                      }
                       className="inline-flex items-center gap-1 px-2.5 py-1 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                     >
                       Batafsil
@@ -86,20 +131,101 @@ const MskOrdersPage = () => {
           </tbody>
         </table>
         {orders.length === 0 && !isLoading && (
-          <div className="text-center py-12 text-gray-500">Buyurtmalar topilmadi</div>
+          <div className="text-center py-12 text-gray-500">
+            Buyurtmalar topilmadi
+          </div>
         )}
       </div>
 
-      <ModalWrapper name="mskOrderDetail" title="Buyurtma tafsiloti" className="max-w-lg">
+      {data && data.pages > 1 && (
+        <Pagination className="mt-4">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => setFilters((p) => ({ ...p, page: p.page - 1 }))}
+                disabled={filters.page === 1}
+              />
+            </PaginationItem>
+            {Array.from({ length: data.pages }, (_, i) => i + 1).map((page) => {
+              const current = filters.page;
+              const total = data.pages;
+              const showPage =
+                page === 1 ||
+                page === total ||
+                (page >= current - 2 && page <= current + 2);
+              const showStartEllipsis = page === 2 && current > 4;
+              const showEndEllipsis = page === total - 1 && current < total - 3;
+              if (showStartEllipsis || showEndEllipsis) {
+                return (
+                  <PaginationItem key={page}>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                );
+              }
+              if (!showPage) return null;
+              return (
+                <PaginationItem key={page}>
+                  <PaginationButton
+                    isActive={page === current}
+                    onClick={() => setFilters((p) => ({ ...p, page }))}
+                  >
+                    {page}
+                  </PaginationButton>
+                </PaginationItem>
+              );
+            })}
+            <PaginationItem>
+              <PaginationNext
+                onClick={() => setFilters((p) => ({ ...p, page: p.page + 1 }))}
+                disabled={filters.page === data.pages}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
+
+      <ModalWrapper
+        name="mskOrderDetail"
+        title="Buyurtma tafsiloti"
+        className="max-w-lg"
+      >
         <MskOrderDetailForm />
       </ModalWrapper>
     </div>
   );
 };
 
-const MskOrderDetailForm = ({ _id, description, category, status, address, user, contactFirstName, contactLastName, contactPhone, rejectionReason, cancelReason, close, isLoading, setIsLoading }) => {
+const STATUS_TRANSITIONS = {
+  pending: ["in_review", "pending_confirmation", "rejected"],
+  in_review: ["pending", "pending_confirmation", "rejected"],
+  pending_confirmation: ["pending", "in_review", "rejected"],
+};
+
+const STATUS_LABELS = {
+  pending: "Kutilmoqda",
+  in_review: "Ko'rib chiqilmoqda",
+  pending_confirmation: "Tasdiq kutilmoqda",
+  rejected: "Rad etildi",
+};
+
+const MskOrderDetailForm = ({
+  _id,
+  description,
+  category,
+  status,
+  address,
+  contactFirstName,
+  contactLastName,
+  contactPhone,
+  rejectionReason,
+  cancelReason,
+  close,
+  isLoading,
+  setIsLoading,
+}) => {
   const queryClient = useQueryClient();
-  const [newStatus, setNewStatus] = useState(status || "");
+  const statusOptions = STATUS_TRANSITIONS[status] || [];
+  const [newStatus, setNewStatus] = useState(statusOptions[0] || "");
   const [reason, setReason] = useState("");
 
   const handleUpdate = async () => {
@@ -108,7 +234,10 @@ const MskOrderDetailForm = ({ _id, description, category, status, address, user,
     }
     setIsLoading(true);
     try {
-      await mskAPI.updateOrderStatus(_id, { status: newStatus, rejectionReason: reason });
+      await mskAPI.updateOrderStatus(_id, {
+        status: newStatus,
+        rejectionReason: reason,
+      });
       queryClient.invalidateQueries({ queryKey: ["admin-msk-orders"] });
       toast.success("Status yangilandi!");
       close();
@@ -128,7 +257,9 @@ const MskOrderDetailForm = ({ _id, description, category, status, address, user,
         </div>
         <div>
           <p className="text-gray-500">Fuqaro</p>
-          <p className="font-medium">{contactFirstName} {contactLastName}</p>
+          <p className="font-medium">
+            {contactFirstName} {contactLastName}
+          </p>
         </div>
         <div>
           <p className="text-gray-500">Telefon</p>
@@ -136,7 +267,9 @@ const MskOrderDetailForm = ({ _id, description, category, status, address, user,
         </div>
         <div>
           <p className="text-gray-500">Hudud</p>
-          <p className="font-medium">{address?.region?.name}, {address?.district?.name}</p>
+          <p className="font-medium">
+            {address?.region?.name}, {address?.district?.name}
+          </p>
         </div>
       </div>
 
@@ -147,39 +280,62 @@ const MskOrderDetailForm = ({ _id, description, category, status, address, user,
 
       {rejectionReason && (
         <div className="p-3 bg-red-50 rounded-lg text-sm text-red-700">
-          <span className="font-medium">Sabab: </span>{rejectionReason}
+          <span className="font-medium">Sabab: </span>
+          {rejectionReason}
         </div>
       )}
 
       {cancelReason && (
         <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-700">
-          <span className="font-medium">Bekor qilish sababi: </span>{cancelReason}
+          <span className="font-medium">Bekor qilish sababi: </span>
+          {cancelReason}
         </div>
       )}
 
-      {status !== "confirmed" && status !== "rejected" && status !== "cancelled" && (
+      {status === "pending_confirmation" && (
+        <div className="p-3 bg-indigo-50 rounded-lg text-sm text-indigo-700">
+          Tasdiq kutilmoqda — fuqaro muammoni tasdiqlashi yoki rad etishi
+          kutilmoqda
+        </div>
+      )}
+
+      {statusOptions.length > 0 && (
         <>
           <div>
-            <label className="block text-sm font-medium mb-1">Statusni o'zgartirish</label>
-            <select value={newStatus} onChange={(e) => setNewStatus(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg text-sm">
-              <option value="pending">Kutilmoqda</option>
-              <option value="in_review">Ko'rib chiqilmoqda</option>
-              <option value="resolved">Bajarildi</option>
-              <option value="rejected">Rad etish</option>
-            </select>
+            <label className="block text-sm font-medium mb-1.5">
+              Statusni o'zgartirish
+            </label>
+            <Select value={newStatus} onValueChange={setNewStatus}>
+              <SelectTrigger className="w-full border rounded-lg text-sm bg-white">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {statusOptions.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {STATUS_LABELS[s]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {newStatus === "rejected" && (
             <div>
               <label className="block text-sm font-medium mb-1">Sabab *</label>
-              <textarea value={reason} onChange={(e) => setReason(e.target.value)}
-                rows={2} className="w-full px-3 py-2 border rounded-lg text-sm resize-none" />
+              <textarea
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                rows={2}
+                className="w-full px-3 py-2 border rounded-lg text-sm resize-none"
+              />
             </div>
           )}
 
-          <button onClick={handleUpdate} disabled={isLoading || newStatus === status}
-            className="w-full py-2.5 bg-blue-600 text-white rounded-lg font-medium disabled:opacity-50">
+          <button
+            onClick={handleUpdate}
+            disabled={isLoading}
+            className="w-full py-2.5 bg-blue-600 text-white rounded-lg font-medium disabled:opacity-50"
+          >
             {isLoading ? "Saqlanmoqda..." : "Statusni yangilash"}
           </button>
         </>
