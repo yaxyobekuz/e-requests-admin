@@ -7,10 +7,30 @@ import ModalWrapper from "@/shared/components/ui/ModalWrapper";
 import { useDispatch } from "react-redux";
 import { open } from "@/features/modal/store/modal.slice";
 import { formatUzDate } from "@/shared/utils/formatDate";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/shadcn/select";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationButton,
+  PaginationPrevious,
+  PaginationNext,
+  PaginationEllipsis,
+} from "@/shared/components/shadcn/pagination";
 
 const ServiceReportsPage = () => {
   const dispatch = useDispatch();
-  const [filters, setFilters] = useState({ serviceId: "", status: "", page: 1 });
+  const [filters, setFilters] = useState({
+    serviceId: "",
+    status: "",
+    page: 1,
+  });
 
   const { data: services = [] } = useQuery({
     queryKey: ["services"],
@@ -31,39 +51,79 @@ const ServiceReportsPage = () => {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">Servis reportlar</h1>
-        <p className="text-sm text-gray-500">Foydalanuvchilardan kelgan xizmat holatlari</p>
+        <h1 className="text-2xl font-bold">Xizmat arizalari</h1>
       </div>
 
       <div className="flex gap-3 mb-4">
-        <select value={filters.serviceId}
-          onChange={(e) => setFilters((p) => ({ ...p, serviceId: e.target.value, page: 1 }))}
-          className="px-3 py-2 border rounded-lg text-sm">
-          <option value="">Barcha servislar</option>
-          {services.map((s) => (
-            <option key={s._id} value={s._id}>{s.name}</option>
-          ))}
-        </select>
-        <select value={filters.status}
-          onChange={(e) => setFilters((p) => ({ ...p, status: e.target.value, page: 1 }))}
-          className="px-3 py-2 border rounded-lg text-sm">
-          <option value="">Barcha statuslar</option>
-          {Object.entries(SERVICE_REPORT_STATUSES).map(([key, val]) => (
-            <option key={key} value={key}>{val.label}</option>
-          ))}
-        </select>
+        <Select
+          value={filters.serviceId || "all"}
+          onValueChange={(val) =>
+            setFilters((p) => ({
+              ...p,
+              serviceId: val === "all" ? "" : val,
+              page: 1,
+            }))
+          }
+        >
+          <SelectTrigger className="w-48 border rounded-lg text-sm bg-white">
+            <SelectValue placeholder="Barcha servislar" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Barcha servislar</SelectItem>
+            {services.map((s) => (
+              <SelectItem key={s._id} value={s._id}>
+                {s.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select
+          value={filters.status || "all"}
+          onValueChange={(val) =>
+            setFilters((p) => ({
+              ...p,
+              status: val === "all" ? "" : val,
+              page: 1,
+            }))
+          }
+        >
+          <SelectTrigger className="w-48 border rounded-lg text-sm bg-white">
+            <SelectValue placeholder="Barcha statuslar" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Barcha statuslar</SelectItem>
+            {Object.entries(SERVICE_REPORT_STATUSES).map(([key, val]) => (
+              <SelectItem key={key} value={key}>
+                {val.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="bg-white rounded-xl border overflow-hidden">
         <table className="w-full">
           <thead className="bg-gray-50 border-b">
             <tr>
-              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Servis</th>
-              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Fuqaro</th>
-              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Hudud</th>
-              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Status</th>
-              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Sana</th>
-              <th className="text-right px-4 py-3 text-sm font-medium text-gray-500">Amal</th>
+              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">
+                Servis
+              </th>
+              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">
+                Fuqaro
+              </th>
+              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">
+                Hudud
+              </th>
+              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">
+                Status
+              </th>
+              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">
+                Sana
+              </th>
+              <th className="text-right px-4 py-3 text-sm font-medium text-gray-500">
+                Amal
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y">
@@ -71,16 +131,24 @@ const ServiceReportsPage = () => {
               const status = SERVICE_REPORT_STATUSES[report.status] || {};
               return (
                 <tr key={report._id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 text-sm font-medium">{report.service?.name}</td>
-                  <td className="px-4 py-3 text-sm">{report.user?.firstName}</td>
+                  <td className="px-4 py-3 text-sm font-medium">
+                    {report.service?.name}
+                  </td>
+                  <td className="px-4 py-3 text-sm">
+                    {report.user?.firstName}
+                  </td>
                   <td className="px-4 py-3 text-sm text-gray-500">
                     {[
                       report.address?.region?.name,
                       report.address?.district?.name,
-                    ].filter(Boolean).join(", ")}
+                    ]
+                      .filter(Boolean)
+                      .join(", ")}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${status.color}`}>
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-full ${status.color}`}
+                    >
                       {status.label}
                     </span>
                   </td>
@@ -101,27 +169,57 @@ const ServiceReportsPage = () => {
           </tbody>
         </table>
         {reports.length === 0 && !isLoading && (
-          <div className="text-center py-12 text-gray-500">Reportlar topilmadi</div>
+          <div className="text-center py-12 text-gray-500">
+            Reportlar topilmadi
+          </div>
         )}
       </div>
 
-      {/* Pagination */}
       {data && data.pages > 1 && (
-        <div className="flex justify-center gap-2 mt-4">
-          {Array.from({ length: data.pages }, (_, i) => i + 1).map((page) => (
-            <button
-              key={page}
-              onClick={() => setFilters((p) => ({ ...p, page }))}
-              className={`px-3 py-1 text-sm rounded-lg border ${
-                filters.page === page
-                  ? "bg-blue-600 text-white border-blue-600"
-                  : "bg-white text-gray-700 hover:bg-gray-50"
-              }`}
-            >
-              {page}
-            </button>
-          ))}
-        </div>
+        <Pagination className="mt-4">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => setFilters((p) => ({ ...p, page: p.page - 1 }))}
+                disabled={filters.page === 1}
+              />
+            </PaginationItem>
+            {Array.from({ length: data.pages }, (_, i) => i + 1).map((page) => {
+              const current = filters.page;
+              const total = data.pages;
+              const showPage =
+                page === 1 ||
+                page === total ||
+                (page >= current - 2 && page <= current + 2);
+              const showStartEllipsis = page === 2 && current > 4;
+              const showEndEllipsis = page === total - 1 && current < total - 3;
+              if (showStartEllipsis || showEndEllipsis) {
+                return (
+                  <PaginationItem key={page}>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                );
+              }
+              if (!showPage) return null;
+              return (
+                <PaginationItem key={page}>
+                  <PaginationButton
+                    isActive={page === current}
+                    onClick={() => setFilters((p) => ({ ...p, page }))}
+                  >
+                    {page}
+                  </PaginationButton>
+                </PaginationItem>
+              );
+            })}
+            <PaginationItem>
+              <PaginationNext
+                onClick={() => setFilters((p) => ({ ...p, page: p.page + 1 }))}
+                disabled={filters.page === data.pages}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       )}
 
       <ModalWrapper
@@ -136,7 +234,18 @@ const ServiceReportsPage = () => {
   );
 };
 
-const ServiceReportDetailForm = ({ _id, service, user, address, status, cancelReason, createdAt, close, isLoading, setIsLoading }) => {
+const ServiceReportDetailForm = ({
+  _id,
+  service,
+  user,
+  address,
+  status,
+  cancelReason,
+  createdAt,
+  close,
+  isLoading,
+  setIsLoading,
+}) => {
   const queryClient = useQueryClient();
   const [newStatus, setNewStatus] = useState(status || "");
   const [reason, setReason] = useState("");
@@ -146,11 +255,12 @@ const ServiceReportDetailForm = ({ _id, service, user, address, status, cancelRe
     setReason("");
   }, [status, _id]);
 
-  const statusOptions = status === "unavailable"
-    ? ["in_progress", "pending_confirmation", "rejected"]
-    : status === "in_progress"
-      ? ["pending_confirmation", "rejected"]
-      : [];
+  const statusOptions =
+    status === "unavailable"
+      ? ["in_progress", "pending_confirmation", "rejected"]
+      : status === "in_progress"
+        ? ["pending_confirmation", "rejected"]
+        : [];
 
   const handleUpdateStatus = async () => {
     if (!newStatus || newStatus === status) return;
@@ -167,7 +277,8 @@ const ServiceReportDetailForm = ({ _id, service, user, address, status, cancelRe
       queryClient.invalidateQueries({ queryKey: ["admin-service-reports"] });
       const messages = {
         in_progress: "Jarayonga olindi!",
-        pending_confirmation: "Mavjud deb belgilandi, foydalanuvchi tasdiqlashi kutilmoqda!",
+        pending_confirmation:
+          "Mavjud deb belgilandi, foydalanuvchi tasdiqlashi kutilmoqda!",
         rejected: "Rad etildi!",
       };
       toast.success(messages[newStatus] || "Status yangilandi!");
@@ -184,7 +295,9 @@ const ServiceReportDetailForm = ({ _id, service, user, address, status, cancelRe
     address?.district?.name,
     address?.neighborhood?.name || address?.neighborhoodCustom,
     address?.street?.name || address?.streetCustom,
-  ].filter(Boolean).join(", ");
+  ]
+    .filter(Boolean)
+    .join(", ");
 
   return (
     <div className="space-y-4">
@@ -218,51 +331,64 @@ const ServiceReportDetailForm = ({ _id, service, user, address, status, cancelRe
       </div>
 
       {status === "pending_confirmation" && (
-        <div className="text-sm text-blue-600">
+        <div className="p-3 bg-blue-50 rounded-lg text-sm text-blue-700">
           Foydalanuvchi tasdiqlashi kutilmoqda
         </div>
       )}
 
       {status === "cancelled" && (
-        <div className="text-sm text-gray-500">
+        <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-500">
           Foydalanuvchi tomonidan bekor qilingan
         </div>
       )}
 
       {cancelReason && (
         <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-700">
-          <span className="font-medium">Bekor qilish sababi: </span>{cancelReason}
+          <span className="font-medium">Bekor qilish sababi: </span>
+          {cancelReason}
         </div>
       )}
 
       {(status === "confirmed" || status === "rejected") && (
-        <div className="text-sm text-gray-400">Yakunlangan</div>
+        <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-400">
+          Yakunlangan
+        </div>
       )}
 
       {statusOptions.length > 0 && (
         <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium mb-1">Statusni o'zgartirish</label>
-            <select
+            <label className="block text-sm font-medium mb-1.5">
+              Statusni o'zgartirish
+            </label>
+            <Select
               value={newStatus}
-              onChange={(e) => {
-                setNewStatus(e.target.value);
-                if (e.target.value !== "rejected") setReason("");
+              onValueChange={(val) => {
+                setNewStatus(val);
+                if (val !== "rejected") setReason("");
               }}
-              className="w-full px-3 py-2 border rounded-lg text-sm"
             >
-              <option value={status}>{SERVICE_REPORT_STATUSES[status]?.label || status}</option>
-              {statusOptions.map((option) => (
-                <option key={option} value={option}>
-                  {SERVICE_REPORT_STATUSES[option]?.label || option}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="w-full border rounded-lg text-sm bg-white">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={status}>
+                  {SERVICE_REPORT_STATUSES[status]?.label || status}
+                </SelectItem>
+                {statusOptions.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {SERVICE_REPORT_STATUSES[option]?.label || option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {newStatus === "rejected" && (
             <div>
-              <label className="block text-sm font-medium mb-1">Rad etish sababi *</label>
+              <label className="block text-sm font-medium mb-1">
+                Rad etish sababi *
+              </label>
               <textarea
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
