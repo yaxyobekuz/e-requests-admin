@@ -54,11 +54,11 @@ const LoginPage = () => {
         <div className="absolute top-20 right-20 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
 
         <div className="relative z-10 p-12 mt-12">
-          <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/40 mb-8 shadow-sm">
-            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
+          <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-md p-2 pr-3.5 rounded-full border border-white/40 mb-8 shadow-sm">
+            <div className="size-8 rounded-full bg-blue-600 flex items-center justify-center">
               <span className="text-white font-bold tracking-wider">E</span>
             </div>
-            <span className="font-semibold text-slate-800 tracking-wide uppercase text-sm">
+            <span className="font-semibold text-slate-800 tracking-wide text-sm uppercase">
               e-Murojaat Platforması
             </span>
           </div>
