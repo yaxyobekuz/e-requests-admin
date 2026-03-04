@@ -67,7 +67,7 @@ const KpiCard = ({ label, value, subtitle, color, icon, isPercent }) => {
       : "—";
 
   return (
-    <div className="bg-white rounded-2xl border p-5 flex flex-col gap-3 hover:shadow-md transition-shadow">
+    <div className="bg-white rounded-2xl border p-5 flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <span className="text-sm text-gray-500 font-medium">{label}</span>
         <div
@@ -129,7 +129,7 @@ const StatusDonut = ({ data, labels }) => {
                 if (!active || !payload?.length) return null;
                 const d = payload[0];
                 return (
-                  <div className="bg-white border rounded-xl shadow-lg px-3 py-2 text-sm">
+                  <div className="bg-white border rounded-xl px-3 py-2 text-sm">
                     <span style={{ color: d.payload.fill }}>
                       {d.name || d.payload.label}:{" "}
                     </span>
@@ -433,7 +433,7 @@ const DashboardPage = () => {
               onClick={() => setPeriod(opt.value)}
               className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                 period === opt.value
-                  ? "bg-blue-600 text-white shadow-sm"
+                  ? "bg-blue-600 text-white"
                   : "text-gray-500 hover:bg-gray-50"
               }`}
             >
@@ -609,7 +609,7 @@ const DashboardPage = () => {
       </section>
 
       {/* ── Section 3: Hududlar ── */}
-      <section>
+      <section className="hidden">
         <SectionHeader
           title="Hududlar bo'yicha"
           subtitle="Tumanlar kesimida arizalar taqsimoti"
