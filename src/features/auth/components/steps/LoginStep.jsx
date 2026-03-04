@@ -2,7 +2,6 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Send } from "lucide-react";
 import { authAPI } from "@/shared/api/http";
-import { BOT_LINK } from "../../auth.data";
 import PasswordField from "../PasswordField";
 import SubmitButton from "../SubmitButton";
 
@@ -40,10 +39,7 @@ const LoginStep = ({
     }
   };
 
-  const handleTelegramClick = () => {
-    window.open(BOT_LINK, "_blank", "noreferrer");
-    onTelegramClick();
-  };
+  const handleTelegramClick = () => onTelegramClick();
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
