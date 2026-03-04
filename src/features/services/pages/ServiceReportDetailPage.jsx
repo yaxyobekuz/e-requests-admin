@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -15,7 +15,6 @@ import {
   SelectValue,
 } from "@/shared/components/shadcn/select";
 import { uzEmblem } from "@/shared/assets/images";
-import { cn } from "@/shared/utils/cn";
 
 const ServiceReportDetailPage = () => {
   const { id } = useParams();
@@ -87,6 +86,7 @@ const ServiceReportDetailPage = () => {
     report.address?.district?.name,
     report.address?.neighborhood?.name || report.address?.neighborhoodCustom,
     report.address?.street?.name || report.address?.streetCustom,
+    report.address?.houseNumber ? `${report.address.houseNumber}-uy` : "",
   ]
     .filter(Boolean)
     .join(", ");
@@ -130,76 +130,64 @@ const ServiceReportDetailPage = () => {
             className="size-20 mx-auto mb-6"
           />
 
-          <div className="mb-6 font-bold text-center text-xl">
-            Andijon viloyati, Baliqchi tuman hokimligi
-          </div>
+          <b className="block mb-6 font-bold text-center text-2xl">
+            O'zbekiston Respublikasi Andijon viloyati <br /> Baliqchi tumani
+            murojaatlar portali
+          </b>
 
+          {/* Divider */}
+          <hr className="mb-6" />
+
+          {/* Date & ID */}
           <div className="flex justify-between items-center mb-8 text-sm">
-            <div>
-              <span className="font-semibold text-gray-600">Sana: </span>
-              {formatUzDate(report.createdAt)}
-            </div>
-            <div>
-              <span className="font-semibold text-gray-600">ID: </span>
-              {report._id}
-            </div>
+            <p>{formatUzDate(report.createdAt)}</p>
+            <p>№ {report._id}</p>
           </div>
 
-          <div className="space-y-6 text-[15px] text-gray-800">
-            <div className="grid grid-cols-2 gap-y-4 gap-x-8 pb-6 border-b">
-              <div>
-                <p className="text-sm text-gray-500 mb-1 font-medium">
-                  Fuqaro (F.I.SH):
-                </p>
-                <p className="font-semibold">
-                  {report.user?.firstName} {report.user?.lastName}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 mb-1 font-medium">
-                  Telefon raqam:
-                </p>
-                <p className="font-semibold">{report.user?.phone}</p>
-              </div>
-              <div className="col-span-2">
-                <p className="text-sm text-gray-500 mb-1 font-medium">
-                  Yashash manzili:
-                </p>
-                <p className="font-semibold">{addressLabel}</p>
-              </div>
+          {/* Subtitle */}
+          <b className="block mb-6 font-semibold text-center text-lg">
+            {addressLabel}da yashovchi Fuqaro {report.user?.firstName}{" "}
+            {report.user?.lastName}ning {report.service?.name} xizmati bo'yicha{" "}
+            <br />
+            <span className="uppercase">arizasi</span>
+          </b>
+
+          <div className="grid grid-cols-2 gap-4 text-[15px] text-gray-800">
+            <div className="space-y-4">
+              <p>
+                <span className="font-bold">F.I.Sh: </span>
+                {report.user?.firstName} {report.user?.lastName}
+              </p>
+              <p>
+                <span className="font-bold">Tel: </span>
+                {report.user?.phone}
+              </p>
+              <p className="col-span-2">
+                <span className="font-bold">Yashash manzili: </span>
+                {addressLabel}
+              </p>
             </div>
 
-            <div
-              className={cn(
-                "grid grid-cols-2 gap-y-4 gap-x-8 pb-6",
-
-                (report.status === "rejected" && report.rejectionReason) ||
-                  (report.status === "cancelled" && report.cancelReason)
-                  ? "border-b"
-                  : "",
-              )}
-            >
-              <div>
-                <p className="text-sm text-gray-500 mb-1 font-medium">
-                  Servis turi:
-                </p>
-                <p className="font-semibold">{report.service?.name}</p>
-              </div>
-
-              <div>
-                <p className="text-sm text-gray-500 mb-1 font-medium">
-                  Joriy holat:
-                </p>
-                <p
-                  className={`font-semibold ${SERVICE_REPORT_STATUSES[report.status]?.color?.replace("bg-", "text-")?.replace("-100", "-700") || "text-black"}`}
-                >
-                  {SERVICE_REPORT_STATUSES[report.status]?.label ||
-                    report.status}
-                </p>
-              </div>
+            <div className="space-y-4">
+              <p>
+                <span className="font-bold">Servis turi: </span>
+                {report.service?.name}
+              </p>
+              <p>
+                <span className="font-bold">Holati: </span>
+                {SERVICE_REPORT_STATUSES[report.status]?.label || report.status}
+              </p>
+              <p>
+                <span className="font-bold">Yaratilgan: </span>
+                {formatUzDate(report.createdAt)}
+              </p>
+              <p>
+                <span className="font-bold">Yangilangan: </span>
+                {formatUzDate(report.updatedAt)}
+              </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-y-4 gap-x-8">
+            <div className="grid grid-cols-2 gap-y-4 gap-x-8 col-span-2">
               {report.status === "rejected" && report.rejectionReason && (
                 <div className="col-span-2">
                   <p className="text-sm text-red-500 mb-1 font-medium">
