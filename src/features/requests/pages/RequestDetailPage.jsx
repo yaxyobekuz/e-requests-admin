@@ -116,88 +116,95 @@ const RequestDetailPage = () => {
             className="size-20 mx-auto mb-6"
           />
 
-          <div className="mb-6 font-bold text-center text-xl">
-            Andijon viloyati, Baliqchi tuman hokimligi
-          </div>
+          {/* Title */}
+          <b className="block mb-6 font-bold text-center text-2xl">
+            O'zbekiston Respublikasi Andijon viloyati <br /> Baliqchi tumani
+            murojaatlar portali
+          </b>
 
+          {/* Divider */}
+          <hr className="mb-6" />
+
+          {/* Date & ID */}
           <div className="flex justify-between items-center mb-8 text-sm">
-            <div>
-              <span className="font-semibold text-gray-600">Sana: </span>
-              {formatUzDate(request.createdAt)}
-            </div>
-            <div>
-              <span className="font-semibold text-gray-600">ID: </span>
-              {request._id}
-            </div>
+            <p>{formatUzDate(request.createdAt)}</p>
+            <p>№ {request._id}</p>
           </div>
 
-          <div className="space-y-6 text-[15px] text-gray-800">
-            <div className="grid grid-cols-2 gap-y-4 gap-x-8 pb-6 border-b">
-              <div>
-                <p className="text-sm text-gray-500 mb-1 font-medium">
-                  Fuqaro (F.I.SH):
-                </p>
-                <p className="font-semibold">
-                  {request.contactFirstName} {request.contactLastName}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 mb-1 font-medium">
-                  Telefon raqam:
-                </p>
-                <p className="font-semibold">{request.contactPhone}</p>
-              </div>
-              <div className="col-span-2">
-                <p className="text-sm text-gray-500 mb-1 font-medium">
-                  Yashash manzili:
-                </p>
-                <p className="font-semibold">
-                  {request.address?.region?.name},{" "}
-                  {request.address?.district?.name},{" "}
-                  {request.address?.neighborhood?.name},{" "}
-                  {request.address?.street?.name}
-                </p>
-              </div>
-            </div>
+          {/* Subtitle */}
+          <b className="block mb-6 font-semibold text-center text-lg">
+            {request.address.region?.name}, {request.address?.district?.name},{" "}
+            {request.address?.neighborhood?.name},{" "}
+            {request.address?.street?.name}, {request.address?.houseNumber} -
+            uyda yashovchi Fuqaro {request.contactFirstName}{" "}
+            {request.contactLastName}ning {getCategoryLabel(request.category)}{" "}
+            masalasi bo'yicha <span className="uppercase">murojaatnomasi</span>
+          </b>
 
-            <div className="grid grid-cols-2 gap-y-4 gap-x-8 pb-6 border-b">
-              <div>
-                <p className="text-sm text-gray-500 mb-1 font-medium">
-                  Murojaat bo'limi:
-                </p>
-                <p className="font-semibold">
-                  {getCategoryLabel(request.category)}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 mb-1 font-medium">
-                  Murojaat turi:
-                </p>
-                <p className="font-semibold">
-                  {request.type?.name || "Belgilanmagan"}
-                </p>
-              </div>
-            </div>
+          {/* Request Description */}
+          <p className="mb-10 whitespace-pre-wrap leading-relaxed">
+            {request.description}
+          </p>
 
-            <div className="pb-6 border-b">
-              <p className="text-sm text-gray-500 mb-2 font-medium">
-                Murojaat mazmuni:
+          <div className="grid grid-cols-2 gap-4 text-[15px] text-gray-800">
+            {/* Left */}
+            <div className="space-y-4">
+              {/* Full Name */}
+              <p>
+                <span className="font-bold">F.I.Sh: </span>
+                {request.contactFirstName} {request.contactLastName}
               </p>
-              <p className="whitespace-pre-wrap leading-relaxed">
-                {request.description}
+
+              {/* Tel */}
+              <p>
+                <span className="font-bold">Tel: </span>
+                {request.contactPhone}
+              </p>
+
+              {/* Address */}
+              <p className="col-span-2">
+                <span className="font-bold">Yashash manzili: </span>
+                {request.address?.region?.name},{" "}
+                {request.address?.district?.name},{" "}
+                {request.address?.neighborhood?.name},{" "}
+                {request.address?.street?.name}
+              </p>
+            </div>
+
+            {/* Right */}
+            <div className="space-y-4">
+              {/* Request Category */}
+              <p>
+                <span className="font-bold">Murojaat bo'limi: </span>
+                {getCategoryLabel(request.category)}
+              </p>
+
+              {/* Request Type */}
+              <p>
+                <span className="font-bold">Murojaat turi: </span>
+                {request.type?.name || "Belgilanmagan"}
+              </p>
+
+              {/* Status */}
+              <p>
+                <span className="font-bold">Holati: </span>
+                {REQUEST_STATUSES[request.status]?.label || request.status}
+              </p>
+
+              {/* Created At */}
+              <p>
+                <span className="font-bold">Yaratilgan: </span>
+                {formatUzDate(request.createdAt)}
+              </p>
+
+              {/* Updated At */}
+              <p>
+                <span className="font-bold">Hal qilingan: </span>
+                {formatUzDate(request.updatedAt)}
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-y-4 gap-x-8">
-              <div>
-                <p className="text-sm text-gray-500 mb-1 font-medium">
-                  Joriy Holat:
-                </p>
-                <p className="font-semibold text-black">
-                  {REQUEST_STATUSES[request.status]?.label || request.status}
-                </p>
-              </div>
-
               {request.status === "rejected" && request.rejectionReason && (
                 <div className="col-span-2">
                   <p className="text-sm text-red-500 mb-1 font-medium">
