@@ -1,11 +1,8 @@
 import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { mskAPI } from "@/shared/api/http";
 import { MSK_ORDER_STATUSES } from "@/shared/data/request-statuses";
-import ModalWrapper from "@/shared/components/ui/ModalWrapper";
-import { useDispatch } from "react-redux";
-import { open } from "@/features/modal/store/modal.slice";
 import { formatUzDate } from "@/shared/utils/formatDate";
 import {
   Select,
@@ -25,7 +22,6 @@ import {
 } from "@/shared/components/shadcn/pagination";
 
 const MskOrdersPage = () => {
-  const dispatch = useDispatch();
   const [filters, setFilters] = useState({ status: "", page: 1 });
 
   const { data, isLoading } = useQuery({
@@ -116,14 +112,12 @@ const MskOrdersPage = () => {
                     {formatUzDate(order.createdAt)}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <button
-                      onClick={() =>
-                        dispatch(open({ modal: "mskOrderDetail", data: order }))
-                      }
+                    <Link
+                      to={`/msk/orders/${order._id}`}
                       className="inline-flex items-center gap-1 px-2.5 py-1 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                     >
                       Batafsil
-                    </button>
+                    </Link>
                   </td>
                 </tr>
               );
@@ -184,162 +178,6 @@ const MskOrdersPage = () => {
         </Pagination>
       )}
 
-      <ModalWrapper
-        name="mskOrderDetail"
-        title="Buyurtma tafsiloti"
-        className="max-w-lg"
-      >
-        <MskOrderDetailForm />
-      </ModalWrapper>
-    </div>
-  );
-};
-
-const STATUS_TRANSITIONS = {
-  pending: ["in_review", "pending_confirmation", "rejected"],
-  in_review: ["pending", "pending_confirmation", "rejected"],
-  pending_confirmation: ["pending", "in_review", "rejected"],
-};
-
-const STATUS_LABELS = {
-  pending: "Kutilmoqda",
-  in_review: "Ko'rib chiqilmoqda",
-  pending_confirmation: "Tasdiq kutilmoqda",
-  rejected: "Rad etildi",
-};
-
-const MskOrderDetailForm = ({
-  _id,
-  description,
-  category,
-  status,
-  address,
-  contactFirstName,
-  contactLastName,
-  contactPhone,
-  rejectionReason,
-  cancelReason,
-  close,
-  isLoading,
-  setIsLoading,
-}) => {
-  const queryClient = useQueryClient();
-  const statusOptions = STATUS_TRANSITIONS[status] || [];
-  const [newStatus, setNewStatus] = useState(statusOptions[0] || "");
-  const [reason, setReason] = useState("");
-
-  const handleUpdate = async () => {
-    if (newStatus === "rejected" && !reason.trim()) {
-      return toast.error("Rad etish sababi kiritilishi shart");
-    }
-    setIsLoading(true);
-    try {
-      await mskAPI.updateOrderStatus(_id, {
-        status: newStatus,
-        rejectionReason: reason,
-      });
-      queryClient.invalidateQueries({ queryKey: ["admin-msk-orders"] });
-      toast.success("Status yangilandi!");
-      close();
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Xatolik yuz berdi");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3 text-sm">
-        <div>
-          <p className="text-gray-500">Kategoriya</p>
-          <p className="font-medium">{category?.name}</p>
-        </div>
-        <div>
-          <p className="text-gray-500">Fuqaro</p>
-          <p className="font-medium">
-            {contactFirstName} {contactLastName}
-          </p>
-        </div>
-        <div>
-          <p className="text-gray-500">Telefon</p>
-          <p className="font-medium">{contactPhone}</p>
-        </div>
-        <div>
-          <p className="text-gray-500">Hudud</p>
-          <p className="font-medium">
-            {address?.region?.name}, {address?.district?.name}
-          </p>
-        </div>
-      </div>
-
-      <div>
-        <p className="text-sm text-gray-500 mb-1">Tavsif</p>
-        <p className="text-sm bg-gray-50 p-3 rounded-lg">{description}</p>
-      </div>
-
-      {rejectionReason && (
-        <div className="p-3 bg-red-50 rounded-lg text-sm text-red-700">
-          <span className="font-medium">Sabab: </span>
-          {rejectionReason}
-        </div>
-      )}
-
-      {cancelReason && (
-        <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-700">
-          <span className="font-medium">Bekor qilish sababi: </span>
-          {cancelReason}
-        </div>
-      )}
-
-      {status === "pending_confirmation" && (
-        <div className="p-3 bg-indigo-50 rounded-lg text-sm text-indigo-700">
-          Tasdiq kutilmoqda — fuqaro muammoni tasdiqlashi yoki rad etishi
-          kutilmoqda
-        </div>
-      )}
-
-      {statusOptions.length > 0 && (
-        <>
-          <div>
-            <label className="block text-sm font-medium mb-1.5">
-              Statusni o'zgartirish
-            </label>
-            <Select value={newStatus} onValueChange={setNewStatus}>
-              <SelectTrigger className="w-full border rounded-lg text-sm bg-white">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {statusOptions.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {STATUS_LABELS[s]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {newStatus === "rejected" && (
-            <div>
-              <label className="block text-sm font-medium mb-1">Sabab *</label>
-              <textarea
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                rows={2}
-                className="w-full px-3 py-2 border rounded-lg text-sm resize-none"
-              />
-            </div>
-          )}
-
-          <button
-            onClick={handleUpdate}
-            disabled={isLoading}
-            className="w-full py-2.5 bg-blue-600 text-white rounded-lg font-medium disabled:opacity-50"
-          >
-            {isLoading ? "Saqlanmoqda..." : "Statusni yangilash"}
-          </button>
-        </>
-      )}
     </div>
   );
 };
