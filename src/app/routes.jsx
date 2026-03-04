@@ -8,8 +8,10 @@ import RequestsListPage from "@/features/requests/pages/RequestsListPage";
 import RequestDetailPage from "@/features/requests/pages/RequestDetailPage";
 import ServicesPage from "@/features/services/pages/ServicesPage";
 import ServiceReportsPage from "@/features/services/pages/ServiceReportsPage";
+import ServiceReportDetailPage from "@/features/services/pages/ServiceReportDetailPage";
 import MskCategoriesPage from "@/features/msk/pages/MskCategoriesPage";
 import MskOrdersPage from "@/features/msk/pages/MskOrdersPage";
+import MskOrderDetailPage from "@/features/msk/pages/MskOrderDetailPage";
 import RequestTypesPage from "@/features/request-types/pages/RequestTypesPage";
 import RegionsPage from "@/features/regions/pages/RegionsPage";
 import DistrictsPage from "@/features/regions/pages/DistrictsPage";
@@ -42,7 +44,9 @@ const Routes = () => {
           <Route path="/requests" element={<RequestsListPage />} />
           <Route path="/requests/:id" element={<RequestDetailPage />} />
           <Route path="/service-reports" element={<ServiceReportsPage />} />
+          <Route path="/service-reports/:id" element={<ServiceReportDetailPage />} />
           <Route path="/msk/orders" element={<MskOrdersPage />} />
+          <Route path="/msk/orders/:id" element={<MskOrderDetailPage />} />
           <Route path="/admins" element={<AdminsPage />} />
           <Route path="/admins/:id" element={<AdminDetailPage />} />
           <Route path="/services" element={<ServicesPage />} />
