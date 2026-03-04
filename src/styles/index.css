@@ -91,3 +91,28 @@
     }
   }
 }
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .printable-content,
+  .printable-content * {
+    visibility: visible;
+  }
+
+  .printable-content {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    margin: 0;
+    padding: 80px;
+    background: white;
+    z-index: 9999;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
