@@ -15,7 +15,6 @@ import {
   SelectValue,
 } from "@/shared/components/shadcn/select";
 import { uzEmblem } from "@/shared/assets/images";
-import { cn } from "@/shared/utils/cn";
 
 const STATUS_TRANSITIONS = {
   pending: ["in_review", "pending_confirmation", "rejected"],
@@ -86,6 +85,7 @@ const MskOrderDetailPage = () => {
     order.address?.district?.name,
     order.address?.neighborhood?.name || order.address?.neighborhoodCustom,
     order.address?.street?.name || order.address?.streetCustom,
+    order.address?.houseNumber ? `${order.address.houseNumber}-uy` : "",
   ]
     .filter(Boolean)
     .join(", ");
@@ -129,79 +129,69 @@ const MskOrderDetailPage = () => {
             className="size-20 mx-auto mb-6"
           />
 
-          <div className="mb-6 font-bold text-center text-xl">
-            Andijon viloyati, Baliqchi tuman hokimligi
-          </div>
+          <b className="block mb-6 font-bold text-center text-2xl">
+            O'zbekiston Respublikasi Andijon viloyati <br /> Baliqchi tumani
+            murojaatlar portali
+          </b>
 
+          {/* Divider */}
+          <hr className="mb-6" />
+
+          {/* Date & ID */}
           <div className="flex justify-between items-center mb-8 text-sm">
-            <div>
-              <span className="font-semibold text-gray-600">Sana: </span>
-              {formatUzDate(order.createdAt)}
-            </div>
-            <div>
-              <span className="font-semibold text-gray-600">ID: </span>
-              {order._id}
-            </div>
+            <p>{formatUzDate(order.createdAt)}</p>
+            <p>№ {order._id}</p>
           </div>
 
-          <div className="space-y-6 text-[15px] text-gray-800">
-            <div className="grid grid-cols-2 gap-y-4 gap-x-8 pb-6 border-b">
-              <div>
-                <p className="text-sm text-gray-500 mb-1 font-medium">
-                  Fuqaro (F.I.SH):
-                </p>
-                <p className="font-semibold">
-                  {order.contactFirstName} {order.contactLastName}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 mb-1 font-medium">
-                  Telefon raqam:
-                </p>
-                <p className="font-semibold">{order.contactPhone}</p>
-              </div>
-              <div className="col-span-2">
-                <p className="text-sm text-gray-500 mb-1 font-medium">
-                  Yashash manzili:
-                </p>
-                <p className="font-semibold">{addressLabel}</p>
-              </div>
-            </div>
+          <b className="block mb-6 font-semibold text-center text-lg">
+            {addressLabel}da yashovchi Fuqaro {order.contactFirstName}{" "}
+            {order.contactLastName}ning {order.category?.name} masalasi bo'yicha{" "}
+            <br />
+            <span className="uppercase">buyurtmasi</span>
+          </b>
 
-            <div className="grid grid-cols-2 gap-y-4 gap-x-8 pb-6 border-b">
-              <div>
-                <p className="text-sm text-gray-500 mb-1 font-medium">
-                  Kategoriya:
-                </p>
-                <p className="font-semibold">{order.category?.name}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 mb-1 font-medium">
-                  Joriy holat:
-                </p>
-                <p className="font-semibold text-black">
-                  {MSK_ORDER_STATUSES[order.status]?.label || order.status}
-                </p>
-              </div>
-            </div>
+          <p className="mb-10 whitespace-pre-wrap leading-relaxed">
+            {order.description}
+          </p>
 
-            <div
-              className={cn(
-                "pb-6",
-
-                (order.status === "rejected" && order.rejectionReason) ||
-                  (order.status === "cancelled" && order.cancelReason)
-                  ? "border-b"
-                  : "",
-              )}
-            >
-              <p className="text-sm text-gray-500 mb-2 font-medium">Tavsif:</p>
-              <p className="whitespace-pre-wrap leading-relaxed">
-                {order.description}
+          <div className="grid grid-cols-2 gap-4 text-[15px] text-gray-800">
+            <div className="space-y-4">
+              <p>
+                <span className="font-bold">F.I.Sh: </span>
+                {order.contactFirstName} {order.contactLastName}
+              </p>
+              <p>
+                <span className="font-bold">Tel: </span>
+                {order.contactPhone}
+              </p>
+              <p className="col-span-2">
+                <span className="font-bold">Yashash manzili: </span>
+                {addressLabel}
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-y-4 gap-x-8">
+            <div className="space-y-4">
+              <p>
+                <span className="font-bold">Kategoriya: </span>
+                {order.category?.name}
+              </p>
+              <p>
+                <span className="font-bold">Holati: </span>
+                {STATUS_LABELS[order.status] ||
+                  MSK_ORDER_STATUSES[order.status]?.label ||
+                  order.status}
+              </p>
+              <p>
+                <span className="font-bold">Yaratilgan: </span>
+                {formatUzDate(order.createdAt)}
+              </p>
+              <p>
+                <span className="font-bold">Yangilangan: </span>
+                {formatUzDate(order.updatedAt)}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-y-4 gap-x-8 col-span-2">
               {order.status === "rejected" && order.rejectionReason && (
                 <div className="col-span-2">
                   <p className="text-sm text-red-500 mb-1 font-medium">
