@@ -30,7 +30,8 @@ http.interceptors.request.use(
 http.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const isAuthEndpoint = error.config?.url?.includes("/api/auth/");
+    if (error.response?.status === 401 && !isAuthEndpoint) {
       localStorage.removeItem("admin_token");
       window.location.href = "/login";
     }
@@ -90,6 +91,7 @@ export const servicesAPI = {
 
 export const serviceReportsAPI = {
   getAll: (params) => http.get("/api/service-reports", { params }),
+  getById: (id) => http.get(`/api/service-reports/${id}`),
   updateStatus: (id, data) => http.put(`/api/service-reports/${id}/status`, data),
   getStats: (params) => http.get("/api/service-reports/stats", { params }),
 };
@@ -100,6 +102,7 @@ export const mskAPI = {
   updateCategory: (id, data) => http.put(`/api/msk/categories/${id}`, data),
   deleteCategory: (id) => http.delete(`/api/msk/categories/${id}`),
   getAllOrders: (params) => http.get("/api/msk/orders", { params }),
+  getOrderById: (id) => http.get(`/api/msk/orders/${id}`),
   updateOrderStatus: (id, data) => http.put(`/api/msk/orders/${id}/status`, data),
 };
 
