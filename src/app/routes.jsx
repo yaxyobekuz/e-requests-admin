@@ -5,6 +5,7 @@ import StatisticsPage from "@/features/statistics/pages/StatisticsPage";
 import AdminsPage from "@/features/admin-management/pages/AdminsPage";
 import AdminDetailPage from "@/features/admin-management/pages/AdminDetailPage";
 import RequestsListPage from "@/features/requests/pages/RequestsListPage";
+import RequestDetailPage from "@/features/requests/pages/RequestDetailPage";
 import ServicesPage from "@/features/services/pages/ServicesPage";
 import ServiceReportsPage from "@/features/services/pages/ServiceReportsPage";
 import MskCategoriesPage from "@/features/msk/pages/MskCategoriesPage";
@@ -39,6 +40,7 @@ const Routes = () => {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/statistics" element={<StatisticsPage />} />
           <Route path="/requests" element={<RequestsListPage />} />
+          <Route path="/requests/:id" element={<RequestDetailPage />} />
           <Route path="/service-reports" element={<ServiceReportsPage />} />
           <Route path="/msk/orders" element={<MskOrdersPage />} />
           <Route path="/admins" element={<AdminsPage />} />
