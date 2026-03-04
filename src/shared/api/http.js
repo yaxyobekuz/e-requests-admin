@@ -69,6 +69,7 @@ export const regionsAPI = {
 
 export const requestsAPI = {
   getAll: (params) => http.get("/api/requests", { params }),
+  getById: (id) => http.get(`/api/requests/${id}`),
   getStats: (params) => http.get("/api/requests/stats", { params }),
   updateStatus: (id, data) => http.put(`/api/requests/${id}/status`, data),
 };
