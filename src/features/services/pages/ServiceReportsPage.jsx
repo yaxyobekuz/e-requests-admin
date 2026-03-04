@@ -1,11 +1,8 @@
-import { useEffect, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { serviceReportsAPI, servicesAPI } from "@/shared/api/http";
 import { SERVICE_REPORT_STATUSES } from "@/shared/data/request-statuses";
-import ModalWrapper from "@/shared/components/ui/ModalWrapper";
-import { useDispatch } from "react-redux";
-import { open } from "@/features/modal/store/modal.slice";
 import { formatUzDate } from "@/shared/utils/formatDate";
 import {
   Select,
@@ -25,7 +22,6 @@ import {
 } from "@/shared/components/shadcn/pagination";
 
 const ServiceReportsPage = () => {
-  const dispatch = useDispatch();
   const [filters, setFilters] = useState({
     serviceId: "",
     status: "",
@@ -43,10 +39,6 @@ const ServiceReportsPage = () => {
   });
 
   const reports = data?.data || [];
-
-  const handleOpenDetail = (report) => {
-    dispatch(open({ modal: "serviceReportDetail", data: report }));
-  };
 
   return (
     <div className="p-6">
@@ -156,12 +148,12 @@ const ServiceReportsPage = () => {
                     {formatUzDate(report.createdAt)}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <button
-                      onClick={() => handleOpenDetail(report)}
+                    <Link
+                      to={`/service-reports/${report._id}`}
                       className="inline-flex items-center gap-1 px-2.5 py-1 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                     >
                       Batafsil
-                    </button>
+                    </Link>
                   </td>
                 </tr>
               );
@@ -222,192 +214,6 @@ const ServiceReportsPage = () => {
         </Pagination>
       )}
 
-      <ModalWrapper
-        name="serviceReportDetail"
-        title="Servis reporti"
-        description="Ba'atafsil ma'lumot va status boshqaruvi"
-        className="max-w-lg"
-      >
-        <ServiceReportDetailForm />
-      </ModalWrapper>
-    </div>
-  );
-};
-
-const ServiceReportDetailForm = ({
-  _id,
-  service,
-  user,
-  address,
-  status,
-  cancelReason,
-  createdAt,
-  close,
-  isLoading,
-  setIsLoading,
-}) => {
-  const queryClient = useQueryClient();
-  const [newStatus, setNewStatus] = useState(status || "");
-  const [reason, setReason] = useState("");
-
-  useEffect(() => {
-    setNewStatus(status || "");
-    setReason("");
-  }, [status, _id]);
-
-  const statusOptions =
-    status === "unavailable"
-      ? ["in_progress", "pending_confirmation", "rejected"]
-      : status === "in_progress"
-        ? ["pending_confirmation", "rejected"]
-        : [];
-
-  const handleUpdateStatus = async () => {
-    if (!newStatus || newStatus === status) return;
-    if (newStatus === "rejected" && !reason.trim()) {
-      return toast.error("Rad etish sababini kiriting");
-    }
-
-    setIsLoading(true);
-    try {
-      await serviceReportsAPI.updateStatus(_id, {
-        status: newStatus,
-        ...(newStatus === "rejected" ? { rejectionReason: reason.trim() } : {}),
-      });
-      queryClient.invalidateQueries({ queryKey: ["admin-service-reports"] });
-      const messages = {
-        in_progress: "Jarayonga olindi!",
-        pending_confirmation:
-          "Mavjud deb belgilandi, foydalanuvchi tasdiqlashi kutilmoqda!",
-        rejected: "Rad etildi!",
-      };
-      toast.success(messages[newStatus] || "Status yangilandi!");
-      close();
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Xatolik yuz berdi");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const addressLabel = [
-    address?.region?.name,
-    address?.district?.name,
-    address?.neighborhood?.name || address?.neighborhoodCustom,
-    address?.street?.name || address?.streetCustom,
-  ]
-    .filter(Boolean)
-    .join(", ");
-
-  return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-        <div className="border rounded-lg p-3">
-          <p className="text-xs text-gray-500">Servis</p>
-          <p className="font-medium">{service?.name || "-"}</p>
-        </div>
-        <div className="border rounded-lg p-3">
-          <p className="text-xs text-gray-500">Fuqaro</p>
-          <p className="font-medium">{user?.firstName || "-"}</p>
-        </div>
-        <div className="border rounded-lg p-3">
-          <p className="text-xs text-gray-500">Telefon</p>
-          <p className="font-medium">{user?.phone || "-"}</p>
-        </div>
-        <div className="border rounded-lg p-3">
-          <p className="text-xs text-gray-500">Hudud</p>
-          <p className="font-medium">{addressLabel || "-"}</p>
-        </div>
-        <div className="border rounded-lg p-3">
-          <p className="text-xs text-gray-500">Sana</p>
-          <p className="font-medium">{formatUzDate(createdAt)}</p>
-        </div>
-        <div className="border rounded-lg p-3">
-          <p className="text-xs text-gray-500">Status</p>
-          <p className="font-medium">
-            {SERVICE_REPORT_STATUSES[status]?.label || "-"}
-          </p>
-        </div>
-      </div>
-
-      {status === "pending_confirmation" && (
-        <div className="p-3 bg-blue-50 rounded-lg text-sm text-blue-700">
-          Foydalanuvchi tasdiqlashi kutilmoqda
-        </div>
-      )}
-
-      {status === "cancelled" && (
-        <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-500">
-          Foydalanuvchi tomonidan bekor qilingan
-        </div>
-      )}
-
-      {cancelReason && (
-        <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-700">
-          <span className="font-medium">Bekor qilish sababi: </span>
-          {cancelReason}
-        </div>
-      )}
-
-      {(status === "confirmed" || status === "rejected") && (
-        <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-400">
-          Yakunlangan
-        </div>
-      )}
-
-      {statusOptions.length > 0 && (
-        <div className="space-y-3">
-          <div>
-            <label className="block text-sm font-medium mb-1.5">
-              Statusni o'zgartirish
-            </label>
-            <Select
-              value={newStatus}
-              onValueChange={(val) => {
-                setNewStatus(val);
-                if (val !== "rejected") setReason("");
-              }}
-            >
-              <SelectTrigger className="w-full border rounded-lg text-sm bg-white">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={status}>
-                  {SERVICE_REPORT_STATUSES[status]?.label || status}
-                </SelectItem>
-                {statusOptions.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {SERVICE_REPORT_STATUSES[option]?.label || option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {newStatus === "rejected" && (
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Rad etish sababi *
-              </label>
-              <textarea
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                rows={3}
-                className="w-full px-3 py-2 border rounded-lg text-sm resize-none"
-                placeholder="Rad etish sababini yozing..."
-              />
-            </div>
-          )}
-
-          <button
-            onClick={handleUpdateStatus}
-            disabled={isLoading || newStatus === status}
-            className="w-full py-2.5 bg-blue-600 text-white rounded-lg font-medium disabled:opacity-50"
-          >
-            {isLoading ? "Saqlanmoqda..." : "Statusni yangilash"}
-          </button>
-        </div>
-      )}
     </div>
   );
 };
