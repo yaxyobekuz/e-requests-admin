@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/shared/components/shadcn/select";
 import { uzEmblem } from "@/shared/assets/images";
+import Button from "@/shared/components/ui/button/Button";
 
 const STATUS_TRANSITIONS = {
   pending: ["in_review", "pending_confirmation", "rejected"],
@@ -100,20 +101,21 @@ const MskOrderDetailPage = () => {
       {/* Chap taraf: Asosiy hujjat (Print qilinadigan qism) */}
       <div className="flex-1 space-y-4">
         <div className="flex items-center justify-between bg-white p-4 rounded-xl border no-print">
-          <button
+          <Button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-sm text-gray-600 hover:text-black"
+            variant="ghost"
+            className="flex items-center gap-2"
           >
             <ArrowLeft className="w-4 h-4" />
             Orqaga
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handlePrint}
-            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition"
+            className="flex items-center gap-2"
           >
             <Printer className="w-4 h-4" />
             Chop etish (PDF)
-          </button>
+          </Button>
         </div>
 
         <div
@@ -260,17 +262,17 @@ const MskOrderDetailPage = () => {
                 </div>
               )}
 
-              <button
+              <Button
                 onClick={handleUpdate}
                 disabled={
                   updateMutation.isPending || newStatus === order.status
                 }
-                className="w-full py-2.5 bg-blue-600 text-white rounded-lg font-medium disabled:opacity-50 hover:bg-blue-700 transition"
+                className="w-full"
               >
                 {updateMutation.isPending
                   ? "Saqlanmoqda..."
                   : "Statusni yangilash"}
-              </button>
+              </Button>
             </div>
           ) : (
             <div className="bg-gray-50 p-4 rounded-lg text-sm text-gray-700">
