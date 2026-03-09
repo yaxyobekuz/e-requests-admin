@@ -20,6 +20,8 @@ const initialState = {
   serviceReportDetail: initialModalData,
   createRequestType: initialModalData,
   editRequestType: initialModalData,
+  createAdminRole: initialModalData,
+  editAdminRole: initialModalData,
 };
 
 export const modalSlice = createSlice({
