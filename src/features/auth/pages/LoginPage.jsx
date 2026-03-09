@@ -1,55 +1,67 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+// React
+import { useEffect } from "react";
+
+// Icons
 import { ArrowLeft } from "lucide-react";
-import useObjectState from "@/shared/hooks/useObjectState";
+
+// Data
+import { authSteps } from "../data/auth.data";
+
+// Images
 import bgImage from "../assets/backgrounds/meeting.avif";
-import { ADMIN_AUTH_STEPS } from "../auth.data";
-import PhoneStep from "../components/steps/PhoneStep";
-import LoginStep from "../components/steps/LoginStep";
-import OtpStep from "../components/steps/OtpStep";
+
+// Components
+import OtpStep from "../components/OtpStep";
+import LoginStep from "../components/LoginStep";
+import PhoneStep from "../components/PhoneStep";
 import Button from "@/shared/components/ui/button/Button";
 
-const STEP_META = {
-  [ADMIN_AUTH_STEPS.PHONE]: {
+// Hooks
+import useObjectState from "@/shared/hooks/useObjectState";
+
+// Router
+import { useNavigate, useSearchParams } from "react-router-dom";
+
+const stepMeta = {
+  phone: {
     title: "Xush kelibsiz! 👋",
-    subtitle: "Davom etish uchun tizimga kiring",
+    subtitle: "Davom etish uchun telefon raqamingizni kiriting",
   },
-  [ADMIN_AUTH_STEPS.LOGIN]: {
+  login: {
     title: "Tizimga kirish",
     subtitle: "Parolni kiriting yoki Telegram orqali kiring",
   },
-  [ADMIN_AUTH_STEPS.OTP]: {
+  otp: {
     title: "Telegram kodi bilan kirish",
     subtitle: "Telegram botidan olgan 5 xonali kodni kiriting",
   },
 };
 
-const BACK_MAP = {
-  [ADMIN_AUTH_STEPS.LOGIN]: ADMIN_AUTH_STEPS.PHONE,
-  [ADMIN_AUTH_STEPS.OTP]: ADMIN_AUTH_STEPS.LOGIN,
-};
+const backMap = { login: authSteps.phone, otp: authSteps.login };
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { phone, password, otp, setField, setFields } = useObjectState({
+    otp: "",
     phone: "",
     password: "",
-    otp: "",
   });
 
-  const step = searchParams.get("step") || ADMIN_AUTH_STEPS.PHONE;
+  const step = searchParams.get("step") || authSteps.phone;
 
-  const goToStep = (s, replace = false) => setSearchParams({ step: s }, { replace });
+  const goToStep = (s, replace = false) => {
+    setSearchParams({ step: s }, { replace });
+  };
 
   useEffect(() => {
-    if (!STEP_META[step]) goToStep(ADMIN_AUTH_STEPS.PHONE, true);
+    if (!stepMeta[step]) goToStep(authSteps.phone, true);
   }, [step]);
 
   const handleChange = (e) => setField(e.target.name, e.target.value);
 
   const handleBack = () => {
-    const backStep = BACK_MAP[step];
+    const backStep = backMap[step];
     if (backStep) {
       setFields({ otp: "", password: "" });
       goToStep(backStep);
@@ -62,8 +74,8 @@ const LoginPage = () => {
     navigate("/dashboard");
   };
 
-  const meta = STEP_META[step] || STEP_META[ADMIN_AUTH_STEPS.PHONE];
-  const hasBack = !!BACK_MAP[step];
+  const meta = stepMeta[step] || stepMeta[authSteps.phone];
+  const hasBack = !!backMap[step];
 
   return (
     <div className="min-h-screen flex bg-slate-50 relative overflow-hidden">
@@ -75,8 +87,8 @@ const LoginPage = () => {
         <div className="w-full max-w-md bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] sm:shadow-none sm:bg-transparent border border-slate-100 sm:border-none p-8 sm:p-0">
           {hasBack && (
             <Button
-              variant="ghost"
               type="button"
+              variant="ghost"
               onClick={handleBack}
               className="flex items-center gap-1.5 mb-6"
             >
@@ -86,32 +98,34 @@ const LoginPage = () => {
           )}
 
           <div className="text-center sm:text-left mb-8">
-            <div className="lg:hidden w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center mx-auto sm:mx-0 mb-4 shadow-sm">
-              <span className="text-white text-xl font-bold tracking-wider">E</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
+            {/* Title */}
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">
               {meta.title}
             </h2>
-            <p className="text-slate-500">{meta.subtitle}</p>
+
+            {/* Subtitle */}
+            <p className="text-slate-500 text-sm">{meta.subtitle}</p>
           </div>
 
-          {step === ADMIN_AUTH_STEPS.PHONE && (
+          {step === authSteps.phone && (
             <PhoneStep
               phone={phone}
               onChange={handleChange}
-              onSuccess={() => goToStep(ADMIN_AUTH_STEPS.LOGIN)}
+              onSuccess={() => goToStep(authSteps.login)}
             />
           )}
-          {step === ADMIN_AUTH_STEPS.LOGIN && (
+
+          {step === authSteps.login && (
             <LoginStep
               phone={phone}
               password={password}
               onChange={handleChange}
               onSuccess={handleAuthSuccess}
-              onTelegramClick={() => goToStep(ADMIN_AUTH_STEPS.OTP)}
+              onTelegramClick={() => goToStep(authSteps.otp)}
             />
           )}
-          {step === ADMIN_AUTH_STEPS.OTP && (
+
+          {step === authSteps.otp && (
             <OtpStep
               phone={phone}
               otp={otp}
