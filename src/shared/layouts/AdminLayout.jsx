@@ -9,8 +9,9 @@ import {
   MapPin,
   LogOut,
   FolderKanban,
-  ChartBar,
   Tags,
+  SlidersHorizontal,
+  Briefcase,
 } from "lucide-react";
 import { logo } from "@/shared/assets/images";
 
@@ -31,6 +32,7 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("admin_user") || "{}");
   const isOwner = user.role === "owner";
+  const canManageAdmins = isOwner || user.canManageAdmins === true;
   const permissions = user.permissions || {};
 
   const hasModuleAccess = (module) => {
@@ -41,7 +43,6 @@ const Sidebar = () => {
 
   const navItems = [
     { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, show: true },
-    { to: "/statistics", label: "Statistika", icon: ChartBar, show: true },
     { isDivider: true, show: true },
     {
       to: "/requests",
@@ -62,7 +63,8 @@ const Sidebar = () => {
       show: hasModuleAccess("msk"),
     },
     { isDivider: true, show: true },
-    { to: "/admins", label: "Adminlar", icon: Users, show: isOwner },
+    { to: "/admins", label: "Adminlar", icon: Users, show: canManageAdmins },
+    { to: "/admin-roles", label: "Lavozimlar", icon: Briefcase, show: isOwner },
     { to: "/services", label: "Servislar", icon: Settings, show: isOwner },
     {
       to: "/request-types",
@@ -77,6 +79,7 @@ const Sidebar = () => {
       show: isOwner,
     },
     { to: "/regions", label: "Hududlar", icon: MapPin, show: isOwner },
+    { to: "/settings", label: "Sozlamalar", icon: SlidersHorizontal, show: isOwner },
   ];
 
   const handleLogout = () => {
