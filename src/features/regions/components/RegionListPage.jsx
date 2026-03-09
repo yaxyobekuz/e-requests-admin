@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { regionsAPI } from "@/shared/api/http";
+import { regionsAPI } from "@/shared/api";
 import { REGION_TYPES } from "@/shared/data/region-types";
 import Breadcrumb from "@/shared/components/ui/Breadcrumb";
 import ModalWrapper from "@/shared/components/ui/ModalWrapper";
@@ -236,3 +236,4 @@ const EditRegionForm = ({ _id, name = "", close, isLoading, setIsLoading }) => {
 };
 
 export default RegionListPage;
+

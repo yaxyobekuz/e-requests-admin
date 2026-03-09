@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { adminsAPI, regionsAPI, requestTypesAPI, servicesAPI, mskAPI } from "@/shared/api/http";
+import { adminsAPI, regionsAPI, requestTypesAPI, servicesAPI, mskAPI } from "@/shared/api";
 import { ArrowLeft, Trash2, icons } from "lucide-react";
 import { Switch } from "@/shared/components/shadcn/switch";
 import { isAccessExceedsCaller } from "../utils/permissions.util";
@@ -668,3 +668,4 @@ const ModulePermissionCard = ({
 };
 
 export default AdminDetailPage;
+

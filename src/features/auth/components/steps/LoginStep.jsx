@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { Send } from "lucide-react";
-import { authAPI } from "@/shared/api/http";
+import { authAPI } from "@/shared/api";
 import PasswordField from "../PasswordField";
 import SubmitButton from "../SubmitButton";
 
@@ -76,3 +76,4 @@ const LoginStep = ({
 };
 
 export default LoginStep;
+

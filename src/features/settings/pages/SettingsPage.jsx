@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { settingsAPI } from "@/shared/api/http";
+import { settingsAPI } from "@/shared/api";
 import { DEADLINE_DAYS_RANGE, DEFAULT_DEADLINE_DAYS } from "../data/settings.data";
 
 const SettingsPage = () => {
@@ -87,3 +87,4 @@ const SettingsPage = () => {
 };
 
 export default SettingsPage;
+

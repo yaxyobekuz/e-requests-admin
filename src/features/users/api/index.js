@@ -1,4 +1,4 @@
-import { usersAPI } from "@/shared/api/http";
+import { usersAPI } from "./endpoints";
 import { useAppQuery, useAppMutation, usersKeys } from "@/shared/lib/query";
 
 // ─── Queries ───────────────────────────────────────────────────────────
@@ -90,3 +90,4 @@ export const useResetUserPassword = (options = {}) => {
     ...options,
   });
 };
+

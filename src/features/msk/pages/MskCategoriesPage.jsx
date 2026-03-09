@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { mskAPI } from "@/shared/api/http";
+import { mskAPI } from "@/shared/api";
 import ModalWrapper from "@/shared/components/ui/ModalWrapper";
 import { useDispatch } from "react-redux";
 import { open } from "@/features/modal/store/modal.slice";
@@ -118,3 +118,4 @@ const CategoryForm = ({ mode, _id, name = "", icon = "", close, isLoading, setIs
 };
 
 export default MskCategoriesPage;
+

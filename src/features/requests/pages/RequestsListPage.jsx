@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { requestsAPI, requestTypesAPI, settingsAPI } from "@/shared/api/http";
+import { requestsAPI, requestTypesAPI, settingsAPI } from "@/shared/api";
 import { requestCategories } from "@/shared/data/request-categories";
 import { REQUEST_STATUSES } from "@/shared/data/request-statuses";
 import { formatUzDate } from "@/shared/utils/formatDate";
@@ -287,3 +287,4 @@ const RequestsListPage = () => {
 };
 
 export default RequestsListPage;
+

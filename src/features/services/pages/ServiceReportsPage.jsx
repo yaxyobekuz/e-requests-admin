@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { serviceReportsAPI, servicesAPI, settingsAPI } from "@/shared/api/http";
+import { serviceReportsAPI, servicesAPI, settingsAPI } from "@/shared/api";
 import { SERVICE_REPORT_STATUSES } from "@/shared/data/request-statuses";
 import { formatUzDate } from "@/shared/utils/formatDate";
 import { buildDeadlineBadge, getDeadlineBadgeClass } from "@/shared/utils/deadline";
@@ -254,3 +254,4 @@ const ServiceReportsPage = () => {
 };
 
 export default ServiceReportsPage;
+

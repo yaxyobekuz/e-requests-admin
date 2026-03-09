@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { requestTypesAPI } from "@/shared/api/http";
+import { requestTypesAPI } from "@/shared/api";
 import ModalWrapper from "@/shared/components/ui/ModalWrapper";
 import { useDispatch } from "react-redux";
 import { open } from "@/features/modal/store/modal.slice";
@@ -123,3 +123,4 @@ const RequestTypeForm = ({ mode, _id, name = "", close, isLoading, setIsLoading 
 };
 
 export default RequestTypesPage;
+

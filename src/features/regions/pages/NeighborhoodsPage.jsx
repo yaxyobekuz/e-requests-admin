@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { regionsAPI } from "@/shared/api/http";
+import { regionsAPI } from "@/shared/api";
 import RegionListPage from "../components/RegionListPage";
 
 const NeighborhoodsPage = () => {
@@ -35,3 +35,4 @@ const NeighborhoodsPage = () => {
 };
 
 export default NeighborhoodsPage;
+

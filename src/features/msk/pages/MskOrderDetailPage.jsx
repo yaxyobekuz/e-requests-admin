@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ArrowLeft, Printer } from "lucide-react";
 
-import { mskAPI } from "@/shared/api/http";
+import { mskAPI } from "@/shared/api";
 import { MSK_ORDER_STATUSES } from "@/shared/data/request-statuses";
 import { formatUzDate } from "@/shared/utils/formatDate";
 import {
@@ -285,3 +285,4 @@ const MskOrderDetailPage = () => {
 };
 
 export default MskOrderDetailPage;
+

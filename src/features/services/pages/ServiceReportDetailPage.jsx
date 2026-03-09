@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ArrowLeft, Printer } from "lucide-react";
 
-import { serviceReportsAPI } from "@/shared/api/http";
+import { serviceReportsAPI } from "@/shared/api";
 import { SERVICE_REPORT_STATUSES } from "@/shared/data/request-statuses";
 import { formatUzDate } from "@/shared/utils/formatDate";
 import {
@@ -286,3 +286,4 @@ const ServiceReportDetailPage = () => {
 };
 
 export default ServiceReportDetailPage;
+

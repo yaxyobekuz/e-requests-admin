@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ArrowLeft, Printer } from "lucide-react";
 
-import { requestsAPI, requestTypesAPI } from "@/shared/api/http";
+import { requestsAPI, requestTypesAPI } from "@/shared/api";
 import { requestCategories } from "@/shared/data/request-categories";
 import { formatUzDate } from "@/shared/utils/formatDate";
 import { REQUEST_STATUSES } from "@/shared/data/request-statuses";
@@ -336,3 +336,4 @@ const RequestDetailPage = () => {
 };
 
 export default RequestDetailPage;
+

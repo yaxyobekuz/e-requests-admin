@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { mskAPI, settingsAPI } from "@/shared/api/http";
+import { mskAPI, settingsAPI } from "@/shared/api";
 import { MSK_ORDER_STATUSES } from "@/shared/data/request-statuses";
 import { formatUzDate } from "@/shared/utils/formatDate";
 import { buildDeadlineBadge, getDeadlineBadgeClass } from "@/shared/utils/deadline";
@@ -225,3 +225,4 @@ const MskOrdersPage = () => {
 };
 
 export default MskOrdersPage;
+

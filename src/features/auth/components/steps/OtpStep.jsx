@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { authAPI } from "@/shared/api/http";
+import { authAPI } from "@/shared/api";
 import OtpHintBlock from "../OtpHintBlock";
 import OtpField from "../OtpField";
 import SubmitButton from "../SubmitButton";
@@ -44,3 +44,4 @@ const OtpStep = ({ phone, otp, onChange, onSuccess }) => {
 };
 
 export default OtpStep;
+

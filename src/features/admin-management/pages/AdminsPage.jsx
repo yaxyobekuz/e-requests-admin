@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { adminsAPI, adminRolesAPI } from "@/shared/api/http";
+import { adminsAPI, adminRolesAPI } from "@/shared/api";
 import ModalWrapper from "@/shared/components/ui/ModalWrapper";
 import { useDispatch } from "react-redux";
 import { open } from "@/features/modal/store/modal.slice";
@@ -202,3 +202,4 @@ const CreateAdminForm = ({ close, isLoading, setIsLoading }) => {
 };
 
 export default AdminsPage;
+
