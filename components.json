@@ -11,7 +11,7 @@
     "prefix": ""
   },
   "aliases": {
-    "utils": "src/shared/utils/cn.js",
+    "utils": "@/shared/utils/cn.js",
     "ui": "src/shared/components/shadcn",
     "components": "src/shared/components"
   }
