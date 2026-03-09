@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ArrowLeft, Printer } from "lucide-react";
+import Button from "@/shared/components/ui/button/Button";
 
 import { requestsAPI, requestTypesAPI } from "@/shared/api";
 import { requestCategories } from "@/shared/data/request-categories";
@@ -90,20 +91,21 @@ const RequestDetailPage = () => {
       {/* Chap taraf: Asosiy hujjat (Print qilinadigan qism) */}
       <div className="flex-1 space-y-4">
         <div className="flex items-center justify-between bg-white p-4 rounded-xl border no-print">
-          <button
+          <Button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-sm text-gray-600 hover:text-black"
+            variant="ghost"
+            className="flex items-center gap-2"
           >
             <ArrowLeft className="w-4 h-4" />
             Orqaga
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handlePrint}
-            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition"
+            className="flex items-center gap-2"
           >
             <Printer className="w-4 h-4" />
             Chop etish (PDF)
-          </button>
+          </Button>
         </div>
 
         <div className="bg-white p-10 rounded-xl border shadow-sm print:shadow-none print:border-none print:m-0 printable-content">
@@ -310,17 +312,17 @@ const RequestDetailPage = () => {
                 </div>
               )}
 
-              <button
+              <Button
                 onClick={handleUpdate}
                 disabled={
                   updateMutation.isPending ||
                   (newStatus === request.status &&
                     newType === (request.type?._id || ""))
                 }
-                className="w-full py-2.5 bg-blue-600 text-white rounded-lg font-medium disabled:opacity-50 hover:bg-blue-700 transition"
+                className="w-full"
               >
                 {updateMutation.isPending ? "Saqlanmoqda..." : "Saqlash"}
-              </button>
+              </Button>
             </div>
           ) : (
             <div className="bg-gray-50 p-4 rounded-lg text-sm text-gray-700">
