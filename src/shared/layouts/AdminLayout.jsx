@@ -14,6 +14,7 @@ import {
   Briefcase,
 } from "lucide-react";
 import { logo } from "@/shared/assets/images";
+import Button from "@/shared/components/ui/button/Button";
 
 const AdminLayout = () => {
   return (
@@ -143,13 +144,14 @@ const Sidebar = () => {
         </div>
 
         {/* Logout */}
-        <button
+        <Button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2 w-full rounded-lg text-sm text-red-600 hover:bg-red-50 transition-colors"
+          variant="ghost"
+          className="flex items-center gap-3 w-full text-red-600 hover:bg-red-50"
         >
           <LogOut className="w-4 h-4" />
           Chiqish
-        </button>
+        </Button>
       </div>
     </aside>
   );
