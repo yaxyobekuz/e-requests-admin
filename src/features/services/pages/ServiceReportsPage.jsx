@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { serviceReportsAPI, servicesAPI } from "@/shared/api/http";
+import { serviceReportsAPI, servicesAPI, settingsAPI } from "@/shared/api/http";
 import { SERVICE_REPORT_STATUSES } from "@/shared/data/request-statuses";
 import { formatUzDate } from "@/shared/utils/formatDate";
+import { buildDeadlineBadge, getDeadlineBadgeClass } from "@/shared/utils/deadline";
 import {
   Select,
   SelectContent,
@@ -25,8 +26,17 @@ const ServiceReportsPage = () => {
   const [filters, setFilters] = useState({
     serviceId: "",
     status: "",
+    deadlineStatus: "",
     page: 1,
   });
+
+  const { data: settingsData } = useQuery({
+    queryKey: ["settings"],
+    queryFn: () => settingsAPI.get().then((res) => res.data),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const deadlineDays = settingsData?.deadlineDays ?? 15;
 
   const { data: services = [] } = useQuery({
     queryKey: ["services"],
@@ -34,8 +44,9 @@ const ServiceReportsPage = () => {
   });
 
   const { data, isLoading } = useQuery({
-    queryKey: ["admin-service-reports", filters],
-    queryFn: () => serviceReportsAPI.getAll(filters).then((res) => res.data),
+    queryKey: ["admin-service-reports", filters, deadlineDays],
+    queryFn: () =>
+      serviceReportsAPI.getAll({ ...filters, deadlineDays }).then((res) => res.data),
   });
 
   const reports = data?.data || [];
@@ -46,7 +57,7 @@ const ServiceReportsPage = () => {
         <h1 className="text-2xl font-bold">Xizmat arizalari</h1>
       </div>
 
-      <div className="flex gap-3 mb-4">
+      <div className="flex flex-wrap gap-3 mb-4">
         <Select
           value={filters.serviceId || "all"}
           onValueChange={(val) =>
@@ -92,6 +103,27 @@ const ServiceReportsPage = () => {
             ))}
           </SelectContent>
         </Select>
+
+        <Select
+          value={filters.deadlineStatus || "all"}
+          onValueChange={(val) =>
+            setFilters((p) => ({
+              ...p,
+              deadlineStatus: val === "all" ? "" : val,
+              page: 1,
+            }))
+          }
+        >
+          <SelectTrigger className="w-56 border rounded-lg text-sm bg-white">
+            <SelectValue placeholder="Ijro muddati holati" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Barcha muddatlar</SelectItem>
+            <SelectItem value="overdue">Muddati o'tgan</SelectItem>
+            <SelectItem value="approaching">Muddati yaqinlashmoqda</SelectItem>
+            <SelectItem value="ok">Muddati ok</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="bg-white rounded-xl border overflow-hidden">
@@ -105,10 +137,10 @@ const ServiceReportsPage = () => {
                 Fuqaro
               </th>
               <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">
-                Hudud
+                Status
               </th>
               <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">
-                Status
+                Ijro muddati
               </th>
               <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">
                 Sana
@@ -121,6 +153,11 @@ const ServiceReportsPage = () => {
           <tbody className="divide-y">
             {reports.map((report) => {
               const status = SERVICE_REPORT_STATUSES[report.status] || {};
+              const { label: deadlineLabel, badgeType } = buildDeadlineBadge(
+                report.createdAt,
+                report.status,
+                deadlineDays
+              );
               return (
                 <tr key={report._id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 text-sm font-medium">
@@ -129,19 +166,18 @@ const ServiceReportsPage = () => {
                   <td className="px-4 py-3 text-sm">
                     {report.user?.firstName}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-500">
-                    {[
-                      report.address?.region?.name,
-                      report.address?.district?.name,
-                    ]
-                      .filter(Boolean)
-                      .join(", ")}
-                  </td>
                   <td className="px-4 py-3">
                     <span
                       className={`text-xs px-2 py-0.5 rounded-full ${status.color}`}
                     >
                       {status.label}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-full ${getDeadlineBadgeClass(badgeType)}`}
+                    >
+                      {deadlineLabel}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-500">
@@ -213,7 +249,6 @@ const ServiceReportsPage = () => {
           </PaginationContent>
         </Pagination>
       )}
-
     </div>
   );
 };
