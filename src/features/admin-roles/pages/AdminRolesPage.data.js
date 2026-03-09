@@ -1,0 +1,17 @@
+export const PAGE_TITLE = "Lavozimlar";
+export const PAGE_SUBTITLE = "Admin lavozimlarini boshqarish";
+export const BTN_NEW = "Yangi lavozim";
+export const MODAL_CREATE_TITLE = "Yangi lavozim yaratish";
+export const MODAL_EDIT_TITLE = "Lavozimni tahrirlash";
+export const COL_NAME = "Nomi";
+export const COL_DESCRIPTION = "Izoh";
+export const LABEL_NAME = "Nomi *";
+export const LABEL_DESCRIPTION = "Izoh (ixtiyoriy)";
+export const PLACEHOLDER_NAME = "Masalan: Hokim, Kotibiyat";
+export const PLACEHOLDER_DESCRIPTION = "Lavozim haqida qisqacha izoh";
+export const MSG_EMPTY = "Lavozimlar yo'q";
+export const MSG_DELETE_CONFIRM = "Lavozimni o'chirishni tasdiqlaysizmi?";
+export const MSG_CREATED = "Lavozim yaratildi!";
+export const MSG_UPDATED = "Lavozim yangilandi!";
+export const MSG_DELETED = "Lavozim o'chirildi!";
+export const ERR_NAME_REQUIRED = "Lavozim nomini kiriting";
