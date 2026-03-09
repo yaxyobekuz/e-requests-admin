@@ -1,13 +1,12 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { adminsAPI, adminRolesAPI } from "@/shared/api";
+import { useQuery } from "@tanstack/react-query";
+import { adminsAPI } from "@/shared/api";
 import ModalWrapper from "@/shared/components/ui/ModalWrapper";
 import { useDispatch } from "react-redux";
 import { open } from "@/features/modal/store/modal.slice";
 import { Plus } from "lucide-react";
-import PhoneInput from "@/shared/components/ui/PhoneInput";
+import Button from "@/shared/components/ui/button/Button";
+import CreateAdminForm from "../components/CreateAdminForm";
 
 const REGION_TYPE_LABELS = { region: "Viloyat", district: "Tuman", neighborhood: "Mahalla", street: "Ko'cha" };
 
@@ -26,13 +25,13 @@ const AdminsPage = () => {
           <h1 className="text-2xl font-bold">Adminlar</h1>
           <p className="text-sm text-gray-500">Adminlarni boshqarish</p>
         </div>
-        <button
+        <Button
           onClick={() => dispatch(open({ modal: "createAdmin" }))}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+          className="flex items-center gap-2"
         >
           <Plus className="w-4 h-4" />
           Yangi admin
-        </button>
+        </Button>
       </div>
 
       <div className="bg-white rounded-xl border overflow-hidden">
@@ -103,101 +102,6 @@ const AdminsPage = () => {
         <CreateAdminForm />
       </ModalWrapper>
     </div>
-  );
-};
-
-const CreateAdminForm = ({ close, isLoading, setIsLoading }) => {
-  const queryClient = useQueryClient();
-  const [form, setForm] = useState({
-    phone: "",
-    password: "",
-    firstName: "",
-    lastName: "",
-    alias: "",
-    adminRole: "",
-  });
-
-  const { data: roles = [] } = useQuery({
-    queryKey: ["admin-roles"],
-    queryFn: () => adminRolesAPI.getAll().then((res) => res.data),
-  });
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const cleanPhone = form.phone.replace(/\D/g, "");
-    if (cleanPhone.length < 12) return toast.error("Telefon raqamni to'liq kiriting");
-    if (!form.password) return toast.error("Parolni kiriting");
-    if (!form.alias.trim()) return toast.error("Tahallus kiritilishi shart");
-    if (!form.adminRole) return toast.error("Lavozim tanlanishi shart");
-
-    setIsLoading(true);
-    try {
-      await adminsAPI.create({ ...form, phone: `+${cleanPhone}` });
-      queryClient.invalidateQueries({ queryKey: ["admins"] });
-      toast.success("Admin yaratildi!");
-      close();
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Xatolik yuz berdi");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-3">
-      <div>
-        <label className="block text-sm font-medium mb-1">Lavozim *</label>
-        <select
-          value={form.adminRole}
-          onChange={(e) => setForm((p) => ({ ...p, adminRole: e.target.value }))}
-          className="w-full px-3 py-2 border rounded-lg text-sm"
-        >
-          <option value="">Lavozim tanlang</option>
-          {roles.map((role) => (
-            <option key={role._id} value={role._id}>{role.name}</option>
-          ))}
-        </select>
-      </div>
-      <div>
-        <label className="block text-sm font-medium mb-1">Tahallus *</label>
-        <input
-          type="text" value={form.alias}
-          onChange={(e) => setForm((p) => ({ ...p, alias: e.target.value }))}
-          className="w-full px-3 py-2 border rounded-lg"
-          placeholder="admin_toshkent"
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="block text-sm font-medium mb-1">Ism</label>
-          <input type="text" value={form.firstName}
-            onChange={(e) => setForm((p) => ({ ...p, firstName: e.target.value }))}
-            className="w-full px-3 py-2 border rounded-lg" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Familiya</label>
-          <input type="text" value={form.lastName}
-            onChange={(e) => setForm((p) => ({ ...p, lastName: e.target.value }))}
-            className="w-full px-3 py-2 border rounded-lg" />
-        </div>
-      </div>
-      <div>
-        <label className="block text-sm font-medium mb-1">Telefon *</label>
-        <PhoneInput value={form.phone}
-          onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium mb-1">Parol *</label>
-        <input type="password" value={form.password}
-          onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
-          className="w-full px-3 py-2 border rounded-lg" placeholder="Kamida 6 ta belgi" />
-      </div>
-      <button type="submit" disabled={isLoading}
-        className="w-full py-2.5 bg-blue-600 text-white rounded-lg font-medium disabled:opacity-50">
-        {isLoading ? "Yaratilmoqda..." : "Yaratish"}
-      </button>
-    </form>
   );
 };
 

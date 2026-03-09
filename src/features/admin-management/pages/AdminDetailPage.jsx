@@ -6,6 +6,9 @@ import { adminsAPI, regionsAPI, requestTypesAPI, servicesAPI, mskAPI } from "@/s
 import { ArrowLeft, Trash2, icons } from "lucide-react";
 import { Switch } from "@/shared/components/shadcn/switch";
 import { isAccessExceedsCaller } from "../utils/permissions.util";
+import Button from "@/shared/components/ui/button/Button";
+import Input from "@/shared/components/ui/input/Input";
+import InputPwd from "@/shared/components/ui/input/InputPwd";
 
 const REGION_TYPE_LABELS = { region: "Viloyat", district: "Tuman", neighborhood: "Mahalla", street: "Ko'cha" };
 
@@ -46,9 +49,9 @@ const AdminDetailPage = () => {
     return (
       <div className="p-6 text-center">
         <p className="text-gray-500">Admin topilmadi</p>
-        <button onClick={() => navigate("/admins")} className="mt-4 text-blue-600 hover:underline text-sm">
+        <Button onClick={() => navigate("/admins")} variant="link" className="mt-4 text-sm">
           Adminlarga qaytish
-        </button>
+        </Button>
       </div>
     );
   }
@@ -57,12 +60,13 @@ const AdminDetailPage = () => {
     <div className="p-6">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <button
+        <Button
           onClick={() => navigate("/admins")}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          variant="ghost"
+          className="p-2"
         >
           <ArrowLeft className="w-5 h-5" />
-        </button>
+        </Button>
         <div>
           <h1 className="text-2xl font-bold">{admin.alias || admin.firstName || "Admin"}</h1>
           <p className="text-sm text-gray-500">{admin.phone}</p>
@@ -76,26 +80,28 @@ const AdminDetailPage = () => {
 
       {/* Tabs */}
       <div className="flex gap-1 mb-6 border-b">
-        <button
+        <Button
           onClick={() => setActiveTab("info")}
-          className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+          variant="ghost"
+          className={`px-4 py-2.5 text-sm font-medium border-b-2 rounded-none ${
             activeTab === "info"
               ? "border-blue-600 text-blue-600"
               : "border-transparent text-gray-500 hover:text-gray-700"
           }`}
         >
           Ma'lumotlar
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => setActiveTab("permissions")}
-          className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+          variant="ghost"
+          className={`px-4 py-2.5 text-sm font-medium border-b-2 rounded-none ${
             activeTab === "permissions"
               ? "border-blue-600 text-blue-600"
               : "border-transparent text-gray-500 hover:text-gray-700"
           }`}
         >
           Ruxsatlar
-        </button>
+        </Button>
       </div>
 
       {/* Tab Content */}
@@ -178,35 +184,37 @@ const AdminInfoTab = ({ admin }) => {
         )}
         <div>
           <label className="block text-sm font-medium mb-1">Tahallus</label>
-          <input type="text" value={form.alias}
+          <Input type="text" value={form.alias}
             onChange={(e) => setForm((p) => ({ ...p, alias: e.target.value }))}
-            className="w-full px-3 py-2 border rounded-lg" />
+            className="w-full" />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-sm font-medium mb-1">Ism</label>
-            <input type="text" value={form.firstName}
+            <Input type="text" value={form.firstName}
               onChange={(e) => setForm((p) => ({ ...p, firstName: e.target.value }))}
-              className="w-full px-3 py-2 border rounded-lg" />
+              className="w-full" />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Familiya</label>
-            <input type="text" value={form.lastName}
+            <Input type="text" value={form.lastName}
               onChange={(e) => setForm((p) => ({ ...p, lastName: e.target.value }))}
-              className="w-full px-3 py-2 border rounded-lg" />
+              className="w-full" />
           </div>
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Yangi parol (ixtiyoriy)</label>
-          <input type="password" value={form.password}
+          <InputPwd value={form.password}
             onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
-            className="w-full px-3 py-2 border rounded-lg" placeholder="Bo'sh qoldiring agar o'zgartirmasa" />
+            placeholder="Bo'sh qoldiring agar o'zgartirmasa" />
         </div>
-        <label className="flex items-center gap-2">
-          <input type="checkbox" checked={form.isActive}
-            onChange={(e) => setForm((p) => ({ ...p, isActive: e.target.checked }))} />
+        <div className="flex items-center gap-2">
+          <Switch
+            checked={form.isActive}
+            onCheckedChange={(checked) => setForm((p) => ({ ...p, isActive: checked }))}
+          />
           <span className="text-sm">Faol</span>
-        </label>
+        </div>
       </div>
 
       {/* Delegatsiya (faqat owner ko'radi) */}
@@ -231,20 +239,20 @@ const AdminInfoTab = ({ admin }) => {
 
       {/* Amallar */}
       <div className="flex items-center justify-between">
-        <button
+        <Button
           onClick={handleDelete}
-          className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg text-sm font-medium transition-colors"
+          variant="ghost"
+          className="flex items-center gap-2 text-red-600 hover:bg-red-50"
         >
           <Trash2 className="w-4 h-4" />
           Adminni o'chirish
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={handleSave}
           disabled={saving}
-          className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium disabled:opacity-50 hover:bg-blue-700"
         >
           {saving ? "Saqlanmoqda..." : "Saqlash"}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -535,13 +543,12 @@ const PermissionsTab = ({ admin }) => {
       />
 
       <div className="flex justify-end">
-        <button
+        <Button
           onClick={handleSave}
           disabled={saving}
-          className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium disabled:opacity-50 hover:bg-blue-700"
         >
           {saving ? "Saqlanmoqda..." : "Saqlash"}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -653,13 +660,14 @@ const ModulePermissionCard = ({
             })}
           </div>
           {selectedIds.length > 0 && (
-            <button
+            <Button
               type="button"
               onClick={() => onSelectedChange([])}
-              className="mt-3 text-xs text-gray-400 hover:text-gray-600"
+              variant="link"
+              className="mt-3 text-xs"
             >
               Barchasini tanlash (cheklovni olib tashlash)
-            </button>
+            </Button>
           )}
         </div>
       )}
