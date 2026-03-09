@@ -1,7 +1,6 @@
 // Pages
 import LoginPage from "@/features/auth/pages/LoginPage";
 import DashboardPage from "@/features/dashboard/pages/DashboardPage";
-import StatisticsPage from "@/features/statistics/pages/StatisticsPage";
 import AdminsPage from "@/features/admin-management/pages/AdminsPage";
 import AdminDetailPage from "@/features/admin-management/pages/AdminDetailPage";
 import RequestsListPage from "@/features/requests/pages/RequestsListPage";
@@ -17,6 +16,8 @@ import RegionsPage from "@/features/regions/pages/RegionsPage";
 import DistrictsPage from "@/features/regions/pages/DistrictsPage";
 import NeighborhoodsPage from "@/features/regions/pages/NeighborhoodsPage";
 import StreetsPage from "@/features/regions/pages/StreetsPage";
+import SettingsPage from "@/features/settings/pages/SettingsPage";
+import AdminRolesPage from "@/features/admin-roles/pages/AdminRolesPage";
 
 // Guards
 import AuthGuard from "@/shared/components/guards/AuthGuard";
@@ -40,7 +41,6 @@ const Routes = () => {
       <Route element={<AuthGuard />}>
         <Route element={<AdminLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/statistics" element={<StatisticsPage />} />
           <Route path="/requests" element={<RequestsListPage />} />
           <Route path="/requests/:id" element={<RequestDetailPage />} />
           <Route path="/service-reports" element={<ServiceReportsPage />} />
@@ -49,6 +49,7 @@ const Routes = () => {
           <Route path="/msk/orders/:id" element={<MskOrderDetailPage />} />
           <Route path="/admins" element={<AdminsPage />} />
           <Route path="/admins/:id" element={<AdminDetailPage />} />
+          <Route path="/admin-roles" element={<AdminRolesPage />} />
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/request-types" element={<RequestTypesPage />} />
           <Route path="/msk/categories" element={<MskCategoriesPage />} />
@@ -56,6 +57,7 @@ const Routes = () => {
           <Route path="/regions/:regionId/districts" element={<DistrictsPage />} />
           <Route path="/regions/:regionId/districts/:districtId/neighborhoods" element={<NeighborhoodsPage />} />
           <Route path="/regions/:regionId/districts/:districtId/neighborhoods/:neighborhoodId/streets" element={<StreetsPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
         </Route>
       </Route>
 
