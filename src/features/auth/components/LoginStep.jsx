@@ -1,17 +1,10 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { Send } from "lucide-react";
 import { authAPI } from "@/shared/api";
-import PasswordField from "../PasswordField";
-import SubmitButton from "../SubmitButton";
 import Button from "@/shared/components/ui/button/Button";
+import InputField from "@/shared/components/ui/input/InputField";
+import { telegramLogo } from "@/shared/assets/icons";
 
-/**
- * Parol bilan kirish qadami.
- * Telegram tugmasi botni yangi oynada ochib, onTelegramClick orqali keyingi stepga o'tadi.
- * Muvaffaqiyatli kirishda onSuccess({ token, user }) chaqiriladi.
- * @param {{phone: string, password: string, onChange: function, onSuccess: function, onTelegramClick: function}} props
- */
 const LoginStep = ({
   phone,
   password,
@@ -32,7 +25,9 @@ const LoginStep = ({
       });
       onSuccess(data);
     } catch (error) {
-      toast.error(error.response?.data?.message || "Kirishda xatolik yuz berdi");
+      toast.error(
+        error.response?.data?.message || "Kirishda xatolik yuz berdi",
+      );
     } finally {
       setLoading(false);
     }
@@ -42,17 +37,20 @@ const LoginStep = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <PasswordField
-        value={password}
+      <InputField
+        required
+        label="Parol"
+        type="password"
+        name="password"
         onChange={onChange}
-        placeholder="Parolingizni kiriting"
       />
 
-      <SubmitButton
-        loading={loading}
-        label="Tizimga kirish"
-        loadingLabel="Kirish jarayoni..."
-      />
+      <Button
+        disabled={loading}
+        className="w-full flex justify-center items-center gap-2"
+      >
+        Tizimga kirish {loading && "..."}
+      </Button>
 
       <div className="relative flex items-center gap-3">
         <div className="flex-1 h-px bg-slate-200" />
@@ -62,11 +60,17 @@ const LoginStep = ({
 
       <Button
         type="button"
-        onClick={handleTelegramClick}
         variant="outline"
-        className="w-full flex items-center justify-center gap-2.5"
+        onClick={handleTelegramClick}
+        className="w-full text-primary hover:bg-white hover:border-primary hover:text-primary"
       >
-        <Send className="w-4 h-4" />
+        <img
+          width={20}
+          height={20}
+          src={telegramLogo}
+          className="size-5"
+          alt="Telegram logo"
+        />
         Telegram orqali kirish
       </Button>
     </form>
@@ -74,4 +78,3 @@ const LoginStep = ({
 };
 
 export default LoginStep;
-
