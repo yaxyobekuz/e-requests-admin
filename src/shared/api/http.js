@@ -58,6 +58,14 @@ export const adminsAPI = {
   delete: (id) => http.delete(`/api/admins/${id}`),
   setRegion: (id, data) => http.put(`/api/admins/${id}/region`, data),
   updatePermissions: (id, data) => http.put(`/api/admins/${id}/permissions`, data),
+  updateDelegation: (id, data) => http.put(`/api/admins/${id}/delegation`, data),
+};
+
+export const adminRolesAPI = {
+  getAll: () => http.get("/api/admin-roles"),
+  create: (data) => http.post("/api/admin-roles", data),
+  update: (id, data) => http.put(`/api/admin-roles/${id}`, data),
+  delete: (id) => http.delete(`/api/admin-roles/${id}`),
 };
 
 export const regionsAPI = {
@@ -71,7 +79,6 @@ export const regionsAPI = {
 export const requestsAPI = {
   getAll: (params) => http.get("/api/requests", { params }),
   getById: (id) => http.get(`/api/requests/${id}`),
-  getStats: (params) => http.get("/api/requests/stats", { params }),
   updateStatus: (id, data) => http.put(`/api/requests/${id}/status`, data),
 };
 
@@ -93,7 +100,6 @@ export const serviceReportsAPI = {
   getAll: (params) => http.get("/api/service-reports", { params }),
   getById: (id) => http.get(`/api/service-reports/${id}`),
   updateStatus: (id, data) => http.put(`/api/service-reports/${id}/status`, data),
-  getStats: (params) => http.get("/api/service-reports/stats", { params }),
 };
 
 export const mskAPI = {
@@ -106,13 +112,7 @@ export const mskAPI = {
   updateOrderStatus: (id, data) => http.put(`/api/msk/orders/${id}/status`, data),
 };
 
-export const statsAPI = {
-  getDashboard: () => http.get("/api/stats/dashboard"),
-  getByRegion: (params) => http.get("/api/stats/by-region", { params }),
-  getTrends: (params) => http.get("/api/stats/trends", { params }),
-  getRegionDetailed: (params) => http.get("/api/stats/by-region/detailed", { params }),
-  getHeatmap: (params) => http.get("/api/stats/heatmap", { params }),
-  getByCategory: (params) => http.get("/api/stats/by-category", { params }),
-  getByService: (params) => http.get("/api/stats/by-service", { params }),
-  getByMskCategory: (params) => http.get("/api/stats/by-msk-category", { params }),
+export const settingsAPI = {
+  get: () => http.get("/api/settings"),
+  update: (data) => http.put("/api/settings", data),
 };
