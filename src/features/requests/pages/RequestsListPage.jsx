@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { requestsAPI, requestTypesAPI } from "@/shared/api/http";
+import { requestsAPI, requestTypesAPI, settingsAPI } from "@/shared/api/http";
 import { requestCategories } from "@/shared/data/request-categories";
 import { REQUEST_STATUSES } from "@/shared/data/request-statuses";
 import { formatUzDate } from "@/shared/utils/formatDate";
+import { buildDeadlineBadge, getDeadlineBadgeClass } from "@/shared/utils/deadline";
 import {
   Select,
   SelectContent,
@@ -27,12 +28,22 @@ const RequestsListPage = () => {
     status: "",
     category: "",
     type: "",
+    deadlineStatus: "",
     page: 1,
   });
 
+  const { data: settingsData } = useQuery({
+    queryKey: ["settings"],
+    queryFn: () => settingsAPI.get().then((res) => res.data),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const deadlineDays = settingsData?.deadlineDays ?? 15;
+
   const { data, isLoading } = useQuery({
-    queryKey: ["admin-requests", filters],
-    queryFn: () => requestsAPI.getAll(filters).then((res) => res.data),
+    queryKey: ["admin-requests", filters, deadlineDays],
+    queryFn: () =>
+      requestsAPI.getAll({ ...filters, deadlineDays }).then((res) => res.data),
   });
 
   const { data: requestTypes = [] } = useQuery({
@@ -52,7 +63,7 @@ const RequestsListPage = () => {
         <h1 className="text-2xl font-bold">Murojaatlar</h1>
       </div>
 
-      <div className="flex gap-3 mb-4">
+      <div className="flex flex-wrap gap-3 mb-4">
         <Select
           value={filters.status || "all"}
           onValueChange={(val) =>
@@ -121,6 +132,27 @@ const RequestsListPage = () => {
             ))}
           </SelectContent>
         </Select>
+
+        <Select
+          value={filters.deadlineStatus || "all"}
+          onValueChange={(val) =>
+            setFilters((p) => ({
+              ...p,
+              deadlineStatus: val === "all" ? "" : val,
+              page: 1,
+            }))
+          }
+        >
+          <SelectTrigger className="w-56 border rounded-lg text-sm bg-white">
+            <SelectValue placeholder="Ijro muddati holati" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Barcha muddatlar</SelectItem>
+            <SelectItem value="overdue">Muddati o'tgan</SelectItem>
+            <SelectItem value="approaching">Muddati yaqinlashmoqda</SelectItem>
+            <SelectItem value="ok">Muddati ok</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="bg-white rounded-xl border overflow-hidden">
@@ -137,10 +169,10 @@ const RequestsListPage = () => {
                 Fuqaro
               </th>
               <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">
-                Hudud
+                Status
               </th>
               <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">
-                Status
+                Ijro muddati
               </th>
               <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">
                 Sana
@@ -153,6 +185,11 @@ const RequestsListPage = () => {
           <tbody className="divide-y">
             {requests.map((req) => {
               const status = REQUEST_STATUSES[req.status] || {};
+              const { label: deadlineLabel, badgeType } = buildDeadlineBadge(
+                req.createdAt,
+                req.status,
+                deadlineDays
+              );
               return (
                 <tr key={req._id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 text-sm">
@@ -162,14 +199,18 @@ const RequestsListPage = () => {
                     {req.type?.name || "—"}
                   </td>
                   <td className="px-4 py-3 text-sm">{req.user?.firstName}</td>
-                  <td className="px-4 py-3 text-sm text-gray-500">
-                    {req.address?.region?.name}, {req.address?.district?.name}
-                  </td>
                   <td className="px-4 py-3">
                     <span
                       className={`text-xs px-2 py-0.5 rounded-full ${status.color}`}
                     >
                       {status.label}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-full ${getDeadlineBadgeClass(badgeType)}`}
+                    >
+                      {deadlineLabel}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-500">
