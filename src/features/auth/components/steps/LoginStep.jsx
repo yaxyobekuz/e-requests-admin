@@ -4,19 +4,18 @@ import { Send } from "lucide-react";
 import { authAPI } from "@/shared/api";
 import PasswordField from "../PasswordField";
 import SubmitButton from "../SubmitButton";
+import Button from "@/shared/components/ui/button/Button";
 
 /**
  * Parol bilan kirish qadami.
  * Telegram tugmasi botni yangi oynada ochib, onTelegramClick orqali keyingi stepga o'tadi.
  * Muvaffaqiyatli kirishda onSuccess({ token, user }) chaqiriladi.
- * @param {{phone: string, password: string, onChange: function, show: boolean, onToggle: function, onSuccess: function, onTelegramClick: function}} props
+ * @param {{phone: string, password: string, onChange: function, onSuccess: function, onTelegramClick: function}} props
  */
 const LoginStep = ({
   phone,
   password,
   onChange,
-  show,
-  onToggle,
   onSuccess,
   onTelegramClick,
 }) => {
@@ -46,8 +45,6 @@ const LoginStep = ({
       <PasswordField
         value={password}
         onChange={onChange}
-        show={show}
-        onToggle={onToggle}
         placeholder="Parolingizni kiriting"
       />
 
@@ -63,14 +60,15 @@ const LoginStep = ({
         <div className="flex-1 h-px bg-slate-200" />
       </div>
 
-      <button
+      <Button
         type="button"
         onClick={handleTelegramClick}
-        className="w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl border-2 border-sky-400 text-sky-600 hover:bg-sky-50 transition-all font-semibold text-sm"
+        variant="outline"
+        className="w-full flex items-center justify-center gap-2.5"
       >
         <Send className="w-4 h-4" />
         Telegram orqali kirish
-      </button>
+      </Button>
     </form>
   );
 };

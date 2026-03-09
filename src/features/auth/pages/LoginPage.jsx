@@ -7,6 +7,7 @@ import { ADMIN_AUTH_STEPS } from "../auth.data";
 import PhoneStep from "../components/steps/PhoneStep";
 import LoginStep from "../components/steps/LoginStep";
 import OtpStep from "../components/steps/OtpStep";
+import Button from "@/shared/components/ui/button/Button";
 
 const STEP_META = {
   [ADMIN_AUTH_STEPS.PHONE]: {
@@ -31,7 +32,6 @@ const BACK_MAP = {
 const LoginPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [showPassword, setShowPassword] = useState(false);
   const { phone, password, otp, setField, setFields } = useObjectState({
     phone: "",
     password: "",
@@ -74,14 +74,15 @@ const LoginPage = () => {
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative z-10">
         <div className="w-full max-w-md bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] sm:shadow-none sm:bg-transparent border border-slate-100 sm:border-none p-8 sm:p-0">
           {hasBack && (
-            <button
+            <Button
+              variant="ghost"
               type="button"
               onClick={handleBack}
-              className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800 transition-colors mb-6"
+              className="flex items-center gap-1.5 mb-6"
             >
               <ArrowLeft className="w-4 h-4" />
               Orqaga
-            </button>
+            </Button>
           )}
 
           <div className="text-center sm:text-left mb-8">
@@ -106,8 +107,6 @@ const LoginPage = () => {
               phone={phone}
               password={password}
               onChange={handleChange}
-              show={showPassword}
-              onToggle={() => setShowPassword((v) => !v)}
               onSuccess={handleAuthSuccess}
               onTelegramClick={() => goToStep(ADMIN_AUTH_STEPS.OTP)}
             />
