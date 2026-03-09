@@ -5,8 +5,13 @@ import { toast } from "sonner";
 import { adminsAPI, regionsAPI, requestTypesAPI, servicesAPI, mskAPI } from "@/shared/api/http";
 import { ArrowLeft, Trash2, icons } from "lucide-react";
 import { Switch } from "@/shared/components/shadcn/switch";
+import { isAccessExceedsCaller } from "../utils/permissions.util";
 
 const REGION_TYPE_LABELS = { region: "Viloyat", district: "Tuman", neighborhood: "Mahalla", street: "Ko'cha" };
+
+const currentUser = JSON.parse(localStorage.getItem("admin_user") || "{}");
+const isCurrentUserOwner = currentUser.role === "owner";
+const isDelegatedManager = !isCurrentUserOwner && currentUser.canManageAdmins === true;
 
 // Lucide ikonkasini nom bo'yicha render qilish
 const LucideIcon = ({ name, className = "w-4 h-4" }) => {
@@ -106,6 +111,7 @@ const AdminInfoTab = ({ admin }) => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
+  const [delegationSaving, setDelegationSaving] = useState(false);
 
   const [form, setForm] = useState({
     alias: admin.alias || "",
@@ -142,10 +148,34 @@ const AdminInfoTab = ({ admin }) => {
     }
   };
 
+  const handleDelegationToggle = async (checked) => {
+    setDelegationSaving(true);
+    try {
+      await adminsAPI.updateDelegation(admin._id, { canManageAdmins: checked });
+      queryClient.invalidateQueries({ queryKey: ["admins", admin._id] });
+      toast.success(checked ? "Delegatsiya yoqildi!" : "Delegatsiya o'chirildi!");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Xatolik yuz berdi");
+    } finally {
+      setDelegationSaving(false);
+    }
+  };
+
   return (
     <div className="max-w-2xl space-y-6">
       <div className="bg-white border rounded-xl p-5 space-y-4">
         <h3 className="font-semibold">Asosiy ma'lumotlar</h3>
+        {admin.adminRole && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-500">Lavozim:</span>
+            <span className="text-xs px-2 py-0.5 bg-purple-50 text-purple-700 rounded-full font-medium">
+              {admin.adminRole.name}
+            </span>
+            {admin.adminRole.description && (
+              <span className="text-xs text-gray-400">{admin.adminRole.description}</span>
+            )}
+          </div>
+        )}
         <div>
           <label className="block text-sm font-medium mb-1">Tahallus</label>
           <input type="text" value={form.alias}
@@ -178,6 +208,26 @@ const AdminInfoTab = ({ admin }) => {
           <span className="text-sm">Faol</span>
         </label>
       </div>
+
+      {/* Delegatsiya (faqat owner ko'radi) */}
+      {isCurrentUserOwner && (
+        <div className="bg-white border rounded-xl p-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold">Admin yaratish huquqi</h3>
+              <p className="text-sm text-gray-500 mt-0.5">
+                Bu admin o'z ruxsatlari doirasida boshqa adminlar yarata oladi
+              </p>
+            </div>
+            <Switch
+              checked={!!admin.canManageAdmins}
+              onCheckedChange={handleDelegationToggle}
+              disabled={delegationSaving}
+              className="data-[state=checked]:bg-blue-600"
+            />
+          </div>
+        </div>
+      )}
 
       {/* Amallar */}
       <div className="flex items-center justify-between">
@@ -444,6 +494,8 @@ const PermissionsTab = ({ admin }) => {
           setPermissions((p) => ({ ...p, requests: { ...p.requests, allowedTypes: ids } }))
         }
         itemLabel="Murojaat turlari"
+        callerAccess={isDelegatedManager ? currentUser.permissions?.requests?.access : undefined}
+        callerAllowedIds={isDelegatedManager ? (currentUser.permissions?.requests?.allowedTypes || []) : undefined}
       />
 
       {/* Xizmat arizalari */}
@@ -460,6 +512,8 @@ const PermissionsTab = ({ admin }) => {
         }
         itemLabel="Servislar"
         showIcons
+        callerAccess={isDelegatedManager ? currentUser.permissions?.services?.access : undefined}
+        callerAllowedIds={isDelegatedManager ? (currentUser.permissions?.services?.allowedTypes || []) : undefined}
       />
 
       {/* MSK buyurtmalar */}
@@ -476,6 +530,8 @@ const PermissionsTab = ({ admin }) => {
         }
         itemLabel="Kategoriyalar"
         showIcons
+        callerAccess={isDelegatedManager ? currentUser.permissions?.msk?.access : undefined}
+        callerAllowedIds={isDelegatedManager ? (currentUser.permissions?.msk?.allowedCategories || []) : undefined}
       />
 
       <div className="flex justify-end">
@@ -502,9 +558,22 @@ const ModulePermissionCard = ({
   onSelectedChange,
   itemLabel,
   showIcons = false,
+  callerAccess,
+  callerAllowedIds,
 }) => {
   const isEnabled = access !== "off";
   const isManage = access === "manage";
+
+  // callerAccess berilgan bo'lsa — delegat admin rejimi, ruxsatlarni cheklaymiz
+  const isCapped = callerAccess !== undefined;
+  const callerCanEnable = !isCapped || (callerAccess && callerAccess !== "off");
+  const callerCanManage = !isCapped || callerAccess === "manage";
+
+  const isItemAllowedByCaller = (itemId) => {
+    if (!isCapped) return true;
+    if (!callerAllowedIds || callerAllowedIds.length === 0) return true;
+    return callerAllowedIds.map((id) => id.toString()).includes(itemId.toString());
+  };
 
   const toggleItem = (id) => {
     if (selectedIds.includes(id)) {
@@ -525,6 +594,7 @@ const ModulePermissionCard = ({
         </div>
         <Switch
           checked={isEnabled}
+          disabled={isCapped && !callerCanEnable}
           onCheckedChange={(checked) => onAccessChange(checked ? "manage" : "off")}
           className="data-[state=checked]:bg-green-500"
         />
@@ -538,6 +608,7 @@ const ModulePermissionCard = ({
           <Switch
             id={`${title}-manage`}
             checked={isManage}
+            disabled={isCapped && !callerCanManage}
             onCheckedChange={(checked) => onAccessChange(checked ? "manage" : "read")}
             className="data-[state=checked]:bg-green-500"
           />
@@ -550,26 +621,36 @@ const ModulePermissionCard = ({
             {itemLabel}
           </p>
           <div className="space-y-2">
-            {items.map((item) => (
-              <div key={item._id} className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm">
-                  {showIcons && item.icon && <LucideIcon name={item.icon} className="w-4 h-4 text-gray-500" />}
-                  <span>{item.name}</span>
+            {items.map((item) => {
+              const allowedByCaller = isItemAllowedByCaller(item._id);
+              return (
+                <div
+                  key={item._id}
+                  className={`flex items-center justify-between ${!allowedByCaller ? "opacity-40" : ""}`}
+                >
+                  <div className="flex items-center gap-2 text-sm">
+                    {showIcons && item.icon && <LucideIcon name={item.icon} className="w-4 h-4 text-gray-500" />}
+                    <span>{item.name}</span>
+                  </div>
+                  <Switch
+                    checked={selectedIds.length === 0 || selectedIds.includes(item._id)}
+                    disabled={!allowedByCaller}
+                    onCheckedChange={() => {
+                      if (!allowedByCaller) return;
+                      if (selectedIds.length === 0) {
+                        // Barchasidan faqat shu birini olib tashlash — qolgan hammasini tanlash
+                        const allExceptThis = items
+                          .filter((i) => i._id !== item._id && isItemAllowedByCaller(i._id))
+                          .map((i) => i._id);
+                        onSelectedChange(allExceptThis);
+                      } else {
+                        toggleItem(item._id);
+                      }
+                    }}
+                  />
                 </div>
-                <Switch
-                  checked={selectedIds.length === 0 || selectedIds.includes(item._id)}
-                  onCheckedChange={() => {
-                    if (selectedIds.length === 0) {
-                      // Barchasidan faqat shu birini olib tashlash — qolgan hammasini tanlash
-                      const allExceptThis = items.filter((i) => i._id !== item._id).map((i) => i._id);
-                      onSelectedChange(allExceptThis);
-                    } else {
-                      toggleItem(item._id);
-                    }
-                  }}
-                />
-              </div>
-            ))}
+              );
+            })}
           </div>
           {selectedIds.length > 0 && (
             <button

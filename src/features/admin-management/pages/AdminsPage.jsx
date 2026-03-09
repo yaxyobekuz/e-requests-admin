@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { adminsAPI } from "@/shared/api/http";
+import { adminsAPI, adminRolesAPI } from "@/shared/api/http";
 import ModalWrapper from "@/shared/components/ui/ModalWrapper";
 import { useDispatch } from "react-redux";
 import { open } from "@/features/modal/store/modal.slice";
@@ -41,6 +41,7 @@ const AdminsPage = () => {
             <tr>
               <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Tahallus</th>
               <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Ism</th>
+              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Lavozim</th>
               <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Telefon</th>
               <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Hududlar</th>
               <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Holat</th>
@@ -52,6 +53,15 @@ const AdminsPage = () => {
               <tr key={admin._id} className="hover:bg-gray-50">
                 <td className="px-4 py-3 text-sm font-medium">{admin.alias}</td>
                 <td className="px-4 py-3 text-sm">{admin.firstName} {admin.lastName}</td>
+                <td className="px-4 py-3 text-sm">
+                  {admin.adminRole?.name ? (
+                    <span className="text-xs px-2 py-0.5 bg-purple-50 text-purple-700 rounded-full">
+                      {admin.adminRole.name}
+                    </span>
+                  ) : (
+                    <span className="text-gray-400">—</span>
+                  )}
+                </td>
                 <td className="px-4 py-3 text-sm text-gray-500">{admin.phone}</td>
                 <td className="px-4 py-3 text-sm">
                   {admin.assignedRegion ? (
@@ -104,6 +114,12 @@ const CreateAdminForm = ({ close, isLoading, setIsLoading }) => {
     firstName: "",
     lastName: "",
     alias: "",
+    adminRole: "",
+  });
+
+  const { data: roles = [] } = useQuery({
+    queryKey: ["admin-roles"],
+    queryFn: () => adminRolesAPI.getAll().then((res) => res.data),
   });
 
   const handleSubmit = async (e) => {
@@ -112,6 +128,7 @@ const CreateAdminForm = ({ close, isLoading, setIsLoading }) => {
     if (cleanPhone.length < 12) return toast.error("Telefon raqamni to'liq kiriting");
     if (!form.password) return toast.error("Parolni kiriting");
     if (!form.alias.trim()) return toast.error("Tahallus kiritilishi shart");
+    if (!form.adminRole) return toast.error("Lavozim tanlanishi shart");
 
     setIsLoading(true);
     try {
@@ -128,6 +145,19 @@ const CreateAdminForm = ({ close, isLoading, setIsLoading }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
+      <div>
+        <label className="block text-sm font-medium mb-1">Lavozim *</label>
+        <select
+          value={form.adminRole}
+          onChange={(e) => setForm((p) => ({ ...p, adminRole: e.target.value }))}
+          className="w-full px-3 py-2 border rounded-lg text-sm"
+        >
+          <option value="">Lavozim tanlang</option>
+          {roles.map((role) => (
+            <option key={role._id} value={role._id}>{role.name}</option>
+          ))}
+        </select>
+      </div>
       <div>
         <label className="block text-sm font-medium mb-1">Tahallus *</label>
         <input
