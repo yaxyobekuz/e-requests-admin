@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { mskAPI } from "@/shared/api/http";
+import { mskAPI, settingsAPI } from "@/shared/api/http";
 import { MSK_ORDER_STATUSES } from "@/shared/data/request-statuses";
 import { formatUzDate } from "@/shared/utils/formatDate";
+import { buildDeadlineBadge, getDeadlineBadgeClass } from "@/shared/utils/deadline";
 import {
   Select,
   SelectContent,
@@ -22,11 +23,24 @@ import {
 } from "@/shared/components/shadcn/pagination";
 
 const MskOrdersPage = () => {
-  const [filters, setFilters] = useState({ status: "", page: 1 });
+  const [filters, setFilters] = useState({
+    status: "",
+    deadlineStatus: "",
+    page: 1,
+  });
+
+  const { data: settingsData } = useQuery({
+    queryKey: ["settings"],
+    queryFn: () => settingsAPI.get().then((res) => res.data),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const deadlineDays = settingsData?.deadlineDays ?? 15;
 
   const { data, isLoading } = useQuery({
-    queryKey: ["admin-msk-orders", filters],
-    queryFn: () => mskAPI.getAllOrders(filters).then((res) => res.data),
+    queryKey: ["admin-msk-orders", filters, deadlineDays],
+    queryFn: () =>
+      mskAPI.getAllOrders({ ...filters, deadlineDays }).then((res) => res.data),
   });
 
   const orders = data?.data || [];
@@ -37,7 +51,7 @@ const MskOrdersPage = () => {
         <h1 className="text-2xl font-bold">MSK buyurtmalar</h1>
       </div>
 
-      <div className="flex gap-3 mb-4">
+      <div className="flex flex-wrap gap-3 mb-4">
         <Select
           value={filters.status || "all"}
           onValueChange={(val) =>
@@ -60,6 +74,27 @@ const MskOrdersPage = () => {
             ))}
           </SelectContent>
         </Select>
+
+        <Select
+          value={filters.deadlineStatus || "all"}
+          onValueChange={(val) =>
+            setFilters((p) => ({
+              ...p,
+              deadlineStatus: val === "all" ? "" : val,
+              page: 1,
+            }))
+          }
+        >
+          <SelectTrigger className="w-56 border rounded-lg text-sm bg-white">
+            <SelectValue placeholder="Ijro muddati holati" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Barcha muddatlar</SelectItem>
+            <SelectItem value="overdue">Muddati o'tgan</SelectItem>
+            <SelectItem value="approaching">Muddati yaqinlashmoqda</SelectItem>
+            <SelectItem value="ok">Muddati ok</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="bg-white rounded-xl border overflow-hidden">
@@ -73,10 +108,10 @@ const MskOrdersPage = () => {
                 Fuqaro
               </th>
               <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">
-                Hudud
+                Status
               </th>
               <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">
-                Status
+                Ijro muddati
               </th>
               <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">
                 Sana
@@ -89,6 +124,11 @@ const MskOrdersPage = () => {
           <tbody className="divide-y">
             {orders.map((order) => {
               const status = MSK_ORDER_STATUSES[order.status] || {};
+              const { label: deadlineLabel, badgeType } = buildDeadlineBadge(
+                order.createdAt,
+                order.status,
+                deadlineDays
+              );
               return (
                 <tr key={order._id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 text-sm font-medium">
@@ -97,15 +137,18 @@ const MskOrdersPage = () => {
                   <td className="px-4 py-3 text-sm">
                     {order.contactFirstName} {order.contactLastName}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-500">
-                    {order.address?.region?.name},{" "}
-                    {order.address?.district?.name}
-                  </td>
                   <td className="px-4 py-3">
                     <span
                       className={`text-xs px-2 py-0.5 rounded-full ${status.color}`}
                     >
                       {status.label}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-full ${getDeadlineBadgeClass(badgeType)}`}
+                    >
+                      {deadlineLabel}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-500">
@@ -177,7 +220,6 @@ const MskOrdersPage = () => {
           </PaginationContent>
         </Pagination>
       )}
-
     </div>
   );
 };
