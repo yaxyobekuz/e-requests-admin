@@ -27,12 +27,19 @@ const InputField = ({
 }) => {
   return (
     <Field data-disabled={props.disabled} className={className}>
-      <FieldLabel htmlFor={id || name}>
-        {label}
-        {props.required && <span className="text-primary">*</span>}
-      </FieldLabel>
-      <InputComponent id={id || name} className={inputClassName} {...props} />
-      <FieldDescription>{description}</FieldDescription>
+      {label && (
+        <FieldLabel htmlFor={id || name}>
+          {label}
+          {props.required && <span className="text-primary">*</span>}
+        </FieldLabel>
+      )}
+      <InputComponent
+        name={name}
+        id={id || name}
+        className={inputClassName}
+        {...props}
+      />
+      {description && <FieldDescription>{description}</FieldDescription>}
     </Field>
   );
 };
