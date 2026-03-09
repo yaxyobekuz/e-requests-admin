@@ -8,7 +8,9 @@ import { useDispatch } from "react-redux";
 import { open } from "@/features/modal/store/modal.slice";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import Button from "@/shared/components/ui/button/Button";
+import CreateRegionForm from "./CreateRegionForm";
+import EditRegionForm from "./EditRegionForm";
 
 /**
  * @param {Object} props
@@ -57,7 +59,7 @@ const RegionListPage = ({ type, parentId, getChildRoute, breadcrumbs = [] }) => 
         <h1 className="text-2xl font-bold">
           {REGION_TYPES[type]?.plural || "Hududlar"}
         </h1>
-        <button
+        <Button
           onClick={() =>
             dispatch(
               open({
@@ -66,11 +68,11 @@ const RegionListPage = ({ type, parentId, getChildRoute, breadcrumbs = [] }) => 
               })
             )
           }
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium"
+          className="flex items-center gap-2"
         >
           <Plus className="w-4 h-4" /> Yangi{" "}
           {REGION_TYPES[type]?.label?.toLowerCase()}
-        </button>
+        </Button>
       </div>
 
             {showBreadcrumbs && (
@@ -96,35 +98,40 @@ const RegionListPage = ({ type, parentId, getChildRoute, breadcrumbs = [] }) => 
               <tr key={item._id} className="hover:bg-gray-50">
                 <td className="px-4 py-3 text-sm">
                   {getChildRoute ? (
-                    <button
+                    <Button
                       onClick={() => navigate(getChildRoute(item))}
-                      className="text-blue-600 hover:underline font-medium"
+                      variant="link"
+                      className="font-medium"
                     >
                       {item.name}
-                    </button>
+                    </Button>
                   ) : (
                     <span className="font-medium">{item.name}</span>
                   )}
                 </td>
                 <td className="px-4 py-3 text-right">
                   <div className="flex items-center justify-end gap-1">
-                    <button
+                    <Button
                       onClick={() =>
                         dispatch(open({ modal: "editRegion", data: item }))
                       }
-                      className="p-1.5 text-gray-400 hover:text-blue-600"
+                      variant="ghost"
+                      size="icon"
+                      className="p-1.5"
                     >
                       <Pencil className="w-4 h-4" />
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       onClick={() => {
                         if (confirm("O'chirishni tasdiqlaysizmi?"))
                           deleteMutation.mutate(item._id);
                       }}
-                      className="p-1.5 text-gray-400 hover:text-red-600"
+                      variant="ghost"
+                      size="icon"
+                      className="p-1.5"
                     >
                       <Trash2 className="w-4 h-4" />
-                    </button>
+                    </Button>
                   </div>
                 </td>
               </tr>
@@ -145,93 +152,6 @@ const RegionListPage = ({ type, parentId, getChildRoute, breadcrumbs = [] }) => 
         <EditRegionForm />
       </ModalWrapper>
     </div>
-  );
-};
-
-const CreateRegionForm = ({ type, parentId, close, isLoading, setIsLoading }) => {
-  const queryClient = useQueryClient();
-  const [name, setName] = useState("");
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!name.trim()) return toast.error("Nomni kiriting");
-    setIsLoading(true);
-    try {
-      await regionsAPI.create({ name: name.trim(), type, parent: parentId });
-      queryClient.invalidateQueries({ queryKey: ["regions"] });
-      toast.success("Hudud yaratildi!");
-      close();
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Xatolik yuz berdi");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-3">
-      <div>
-        <label className="block text-sm font-medium mb-1">
-          {REGION_TYPES[type]?.label || "Hudud"} nomi
-        </label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full px-3 py-2 border rounded-lg"
-          placeholder="Nomni kiriting"
-        />
-      </div>
-      <button
-        type="submit"
-        disabled={isLoading}
-        className="w-full py-2.5 bg-blue-600 text-white rounded-lg font-medium disabled:opacity-50"
-      >
-        {isLoading ? "Yaratilmoqda..." : "Yaratish"}
-      </button>
-    </form>
-  );
-};
-
-const EditRegionForm = ({ _id, name = "", close, isLoading, setIsLoading }) => {
-  const queryClient = useQueryClient();
-  const [newName, setNewName] = useState(name);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!newName.trim()) return toast.error("Nomni kiriting");
-    setIsLoading(true);
-    try {
-      await regionsAPI.update(_id, { name: newName.trim() });
-      queryClient.invalidateQueries({ queryKey: ["regions"] });
-      toast.success("Hudud yangilandi!");
-      close();
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Xatolik yuz berdi");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-3">
-      <div>
-        <label className="block text-sm font-medium mb-1">Nomi</label>
-        <input
-          type="text"
-          value={newName}
-          onChange={(e) => setNewName(e.target.value)}
-          className="w-full px-3 py-2 border rounded-lg"
-        />
-      </div>
-      <button
-        type="submit"
-        disabled={isLoading}
-        className="w-full py-2.5 bg-blue-600 text-white rounded-lg font-medium disabled:opacity-50"
-      >
-        {isLoading ? "Saqlanmoqda..." : "Saqlash"}
-      </button>
-    </form>
   );
 };
 
