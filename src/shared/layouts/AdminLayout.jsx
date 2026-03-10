@@ -12,6 +12,7 @@ import {
   AlertTriangle,
   LayoutDashboard,
   SlidersHorizontal,
+  UserCircle,
 } from "lucide-react";
 
 // Images
@@ -111,10 +112,28 @@ const Sidebar = () => {
 
       {/* Logout */}
       <div className="p-3 border-t">
+        {/* Profil */}
+        <NavLink
+          to="/profile"
+          className={({ isActive }) =>
+            `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+              isActive ? "bg-blue-50 text-blue-700" : "text-gray-600 hover:bg-gray-50"
+            }`
+          }
+        >
+          <UserCircle className="w-4 h-4 flex-shrink-0" />
+          <div className="min-w-0">
+            <p className="truncate font-medium leading-tight">
+              {user.alias || user.firstName || "Owner"}
+            </p>
+            <p className="text-xs text-gray-400 capitalize leading-tight">{user.role}</p>
+          </div>
+        </NavLink>
+
         <Button
           variant="ghost"
           onClick={handleLogout}
-          className="w-full bg-red-50 text-red-600"
+          className="w-full bg-red-50 text-red-600 mt-1"
         >
           <LogOut className="w-4 h-4" />
           Chiqish
