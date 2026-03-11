@@ -76,3 +76,29 @@ export const capPermissions = (permissions, callerPermissions) => {
 export const isAccessExceedsCaller = (access, callerAccess) => {
   return getAccessRank(access) > getAccessRank(callerAccess);
 };
+
+/**
+ * Backend uchun to'liq permissions payloadini tuzadi.
+ * Faqat o'zgargan modul yangi ma'lumot bilan, qolgan 2 modul admin'ning mavjud qiymatlaridan olinadi.
+ * @param {object} admin - Mavjud admin obyekti
+ * @param {"requests"|"services"|"msk"} moduleKey - O'zgartiriladigan modul
+ * @param {object} moduleData - Yangi modul ma'lumotlari ({ access, allowedTypes } yoki { access, allowedCategories })
+ * @returns {object} - Backend updatePermissions uchun to'liq permissions payload
+ */
+export const buildPermissionsPayload = (admin, moduleKey, moduleData) => {
+  const base = {
+    requests: {
+      access: admin.permissions?.requests?.access ?? "off",
+      allowedTypes: (admin.permissions?.requests?.allowedTypes || []).map((t) => t._id || t),
+    },
+    services: {
+      access: admin.permissions?.services?.access ?? "off",
+      allowedTypes: (admin.permissions?.services?.allowedTypes || []).map((t) => t._id || t),
+    },
+    msk: {
+      access: admin.permissions?.msk?.access ?? "off",
+      allowedCategories: (admin.permissions?.msk?.allowedCategories || []).map((c) => c._id || c),
+    },
+  };
+  return { ...base, [moduleKey]: moduleData };
+};
