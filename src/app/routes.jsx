@@ -3,6 +3,11 @@ import LoginPage from "@/features/auth/pages/LoginPage";
 import DashboardPage from "@/features/dashboard/pages/DashboardPage";
 import AdminsPage from "@/features/admin-management/pages/AdminsPage";
 import AdminDetailPage from "@/features/admin-management/pages/AdminDetailPage";
+import AdminInfoTab from "@/features/admin-management/pages/tabs/AdminInfoTab";
+import RegionTab from "@/features/admin-management/pages/tabs/RegionTab";
+import RequestsTab from "@/features/admin-management/pages/tabs/RequestsTab";
+import ServicesTab from "@/features/admin-management/pages/tabs/ServicesTab";
+import MskTab from "@/features/admin-management/pages/tabs/MskTab";
 import RequestsListPage from "@/features/requests/pages/RequestsListPage";
 import RequestDetailPage from "@/features/requests/pages/RequestDetailPage";
 import ServicesPage from "@/features/services/pages/ServicesPage";
@@ -49,7 +54,14 @@ const Routes = () => {
           <Route path="/msk/orders" element={<MskOrdersPage />} />
           <Route path="/msk/orders/:id" element={<MskOrderDetailPage />} />
           <Route path="/admins" element={<AdminsPage />} />
-          <Route path="/admins/:id" element={<AdminDetailPage />} />
+          <Route path="/admins/:id" element={<AdminDetailPage />}>
+            <Route index element={<Navigate to="malumotlar" replace />} />
+            <Route path="malumotlar" element={<AdminInfoTab />} />
+            <Route path="hudud-ruxsati" element={<RegionTab />} />
+            <Route path="murojaat-ruxsati" element={<RequestsTab />} />
+            <Route path="servis-ruxsati" element={<ServicesTab />} />
+            <Route path="msk-ruxsati" element={<MskTab />} />
+          </Route>
           <Route path="/admin-roles" element={<AdminRolesPage />} />
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/request-types" element={<RequestTypesPage />} />
