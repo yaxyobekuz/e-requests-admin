@@ -25,6 +25,7 @@ import SettingsPage from "@/features/settings/pages/SettingsPage";
 import AdminRolesPage from "@/features/admin-roles/pages/AdminRolesPage";
 import ProfilePage from "@/features/profile/pages/ProfilePage";
 import StatisticsPage from "@/features/statistics/pages/StatisticsPage";
+import ProductsPage from "@/features/products/pages/ProductsPage";
 
 // Guards
 import AuthGuard from "@/shared/components/guards/AuthGuard";
@@ -74,6 +75,7 @@ const Routes = () => {
           <Route path="/regions/:regionId/districts/:districtId/neighborhoods/:neighborhoodId/streets" element={<StreetsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/products" element={<ProductsPage />} />
         </Route>
       </Route>
 
