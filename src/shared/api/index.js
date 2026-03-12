@@ -7,3 +7,4 @@ export { requestTypesAPI } from "@/features/request-types/api";
 export { servicesAPI, serviceReportsAPI } from "@/features/services/api";
 export { mskAPI } from "@/features/msk/api";
 export { settingsAPI } from "@/features/settings/api";
+export { productsAPI } from "@/features/products/api";
