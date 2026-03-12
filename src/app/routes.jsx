@@ -24,6 +24,7 @@ import StreetsPage from "@/features/regions/pages/StreetsPage";
 import SettingsPage from "@/features/settings/pages/SettingsPage";
 import AdminRolesPage from "@/features/admin-roles/pages/AdminRolesPage";
 import ProfilePage from "@/features/profile/pages/ProfilePage";
+import StatisticsPage from "@/features/statistics/pages/StatisticsPage";
 
 // Guards
 import AuthGuard from "@/shared/components/guards/AuthGuard";
@@ -47,6 +48,7 @@ const Routes = () => {
       <Route element={<AuthGuard />}>
         <Route element={<AdminLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/statistics" element={<StatisticsPage />} />
           <Route path="/requests" element={<RequestsListPage />} />
           <Route path="/requests/:id" element={<RequestDetailPage />} />
           <Route path="/service-reports" element={<ServiceReportsPage />} />
