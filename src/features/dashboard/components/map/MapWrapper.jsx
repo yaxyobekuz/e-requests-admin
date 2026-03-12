@@ -1,5 +1,5 @@
-// Components
-import Card from "@/shared/components/ui/Card";
+// Utils
+import { cn } from "@/shared/utils/cn";
 
 // React
 import { Children, cloneElement, useState } from "react";
@@ -17,12 +17,12 @@ import { Children, cloneElement, useState } from "react";
  * @param {function} [props.onChange] - Called with the clicked region's data-title value
  */
 const MapWrapper = ({
+  value,
   viewBox,
+  onChange,
   children,
   strokeWidth,
   className = "",
-  value,
-  onChange,
 }) => {
   const [tooltip, setTooltip] = useState({
     x: 0,
@@ -57,40 +57,36 @@ const MapWrapper = ({
   };
 
   return (
-    <Card className={className}>
-      <div className="relative">
-        <svg
-          stroke="#fff"
-          viewBox={viewBox}
-          onClick={handleClick}
-          strokeWidth={strokeWidth}
-          className="map-wrapper-svg"
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeave}
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          {Children.map(children, (child, i) =>
-            cloneElement(child, {
-              key: i,
-              className:
-                child.props["data-title"] === activeRegion
-                  ? "active"
-                  : undefined,
-            }),
-          )}
-        </svg>
-
-        {/* Tooltip */}
-        {tooltip.visible && (
-          <div
-            style={{ left: tooltip.x, top: tooltip.y }}
-            className="pointer-events-none absolute z-10 rounded bg-gray-800 px-2 py-1 text-xs text-white shadow transition-all delay-300 duration-1000"
-          >
-            {tooltip.title}
-          </div>
+    <div className={cn("flex items-center justify-center relative", className)}>
+      <svg
+        stroke="#fff"
+        viewBox={viewBox}
+        onClick={handleClick}
+        strokeWidth={strokeWidth}
+        className="map-wrapper-svg"
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        {Children.map(children, (child, i) =>
+          cloneElement(child, {
+            key: i,
+            className:
+              child.props["data-title"] === activeRegion ? "active" : undefined,
+          }),
         )}
-      </div>
-    </Card>
+      </svg>
+
+      {/* Tooltip */}
+      {tooltip.visible && (
+        <div
+          style={{ left: tooltip.x, top: tooltip.y }}
+          className="pointer-events-none absolute z-10 rounded bg-gray-800 px-2 py-1 text-xs text-white shadow transition-all delay-300 duration-1000"
+        >
+          {tooltip.title}
+        </div>
+      )}
+    </div>
   );
 };
 
