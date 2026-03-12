@@ -6,6 +6,8 @@ import { useState, useEffect } from "react";
 
 // API
 import { authAPI } from "@/shared/api";
+
+// Components
 import Card from "@/shared/components/ui/Card";
 
 // Tanstack query
@@ -33,7 +35,7 @@ const TopPanel = () => {
   const seconds = String(now.getSeconds()).padStart(2, "0");
 
   return (
-    <div className="flex items-start justify-between">
+    <div className="flex items-center justify-between mb-4">
       {/* Left side */}
       <div className="space-y-2">
         <h1 className="text-2xl font-bold text-gray-900">
