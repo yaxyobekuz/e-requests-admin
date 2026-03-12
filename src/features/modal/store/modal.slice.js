@@ -22,6 +22,10 @@ const initialState = {
   editRequestType: initialModalData,
   createAdminRole: initialModalData,
   editAdminRole: initialModalData,
+  createProduct: initialModalData,
+  editProduct: initialModalData,
+  addVariety: initialModalData,
+  editVariety: initialModalData,
 };
 
 export const modalSlice = createSlice({
