@@ -14,20 +14,20 @@ import KarakalpakstanMap from "../KarakalpakstanMap";
 
 /** @type {{ label: string }[]} */
 const uzbekistanRegions = [
-  { component: AndijanMap, label: "Andijon" },
-  { component: BukharaMap, label: "Buxoro" },
-  { component: FerganaMap, label: "Farg'ona" },
-  { component: JizzakhMap, label: "Jizzax" },
-  { component: NamanganMap, label: "Namangan" },
-  { component: NavoiMap, label: "Navoiy" },
-  { component: KashkadaryaMap, label: "Qashqadaryo" },
+  { component: AndijanMap, label: "Andijon viloyati" },
+  { component: BukharaMap, label: "Buxoro viloyati" },
+  { component: FerganaMap, label: "Farg'ona viloyati" },
+  { component: JizzakhMap, label: "Jizzax viloyati" },
+  { component: NamanganMap, label: "Namangan viloyati" },
+  { component: NavoiMap, label: "Navoiy viloyati" },
+  { component: KashkadaryaMap, label: "Qashqadaryo viloyati" },
   { component: KarakalpakstanMap, label: "Qoraqalpog'iston Respublikasi" },
-  { component: AndijanMap, label: "Samarqand" },
-  { component: SyrdaryaMap, label: "Sirdaryo" },
-  { component: SurkhandaryaMap, label: "Surxondaryo" },
+  { component: AndijanMap, label: "Samarqand viloyati" },
+  { component: SyrdaryaMap, label: "Sirdaryo viloyati" },
+  { component: SurkhandaryaMap, label: "Surxondaryo viloyati" },
   { component: TashkentCityMap, label: "Toshkent Shahri" },
-  { component: TashkentMap, label: "Toshkent" },
-  { component: KhorezmMap, label: "Xorazm" },
+  { component: TashkentMap, label: "Toshkent viloyati" },
+  { component: KhorezmMap, label: "Xorazm viloyati" },
 ];
 
 export const getRegionByLabel = (label) => {
