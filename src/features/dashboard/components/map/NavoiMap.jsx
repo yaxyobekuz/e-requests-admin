@@ -1,9 +1,9 @@
 ﻿// Components
 import MapWrapper from "./MapWrapper";
 
-const NavoiMap = ({ value, onChange }) => {
+const NavoiMap = ({ value, onChange, className }) => {
   return (
-    <MapWrapper viewBox="0 0 919 659" value={value} onChange={onChange}>
+    <MapWrapper viewBox="0 0 919 659" value={value} onChange={onChange} className={className}>
       <path
         data-title="Qiziltepa tumani"
         d="M471,620.33a52.15,52.15,0,0,1-6.83,4.17c-3.17,1.5-5,1.83-6.34-1.33l-.16-6.5-3-10.84-9.34-1.66V590.5s-9.66-1.33-11.83-3.33a6,6,0,0,1-2.17-4h-2.5l-1.5,3.33-5-3,.17-3-6.17-2.33-2.5-4.17-3.66-.33-1.34-7.34-3.5-3s-1.5-9.83,2-13.16,14.17-9.34,14.17-9.34l1.67-10.16a21.49,21.49,0,0,0,7.44-2l6.57,1.38s2.82,4.74,3.65,6.74-.83,6,2,10.34,6.5,8.83,7.5,10.5,0,5,0,5,5,0,7,3.83a13.71,13.71,0,0,1,1,8.33l3.84,3.17s7.66,10.83,7.83,14.33A52.82,52.82,0,0,1,469,605c-.83,3.17-1,10.17-1,10.17Z"

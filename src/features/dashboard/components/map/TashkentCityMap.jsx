@@ -1,9 +1,9 @@
 ﻿// Components
 import MapWrapper from "./MapWrapper";
 
-const TashkentCityMap = ({ value, onChange }) => {
+const TashkentCityMap = ({ value, onChange, className }) => {
   return (
-    <MapWrapper viewBox="0 0 1000 1000" value={value} onChange={onChange}>
+    <MapWrapper viewBox="0 0 1000 1000" value={value} onChange={onChange} className={className}>
       <path
         data-title="Olmazor tumani"
         d="M283.4,327c0,0,0.7-11.3,4.7-18.2c4-6.8,12.2-18.2,16.7-20.8s73.5-64.2,73.5-64.2l1-7.5l7.8,0.7 c0,0,23.5-19.8,24.5-21c1-1.2,2.8-2.5,2.8-2.5s17.8,21.7,20.2,28.8s2.8,12.8,8.5,17.7c5.7,4.8,14.8,13.8,14.8,13.8l19.5,20.7 l9.3,7.8l17.5,21.8l-14,16.8l7.2,5.2c0,0-3.7,3.2-4.8,8.8H491c0,0-6.7,9-7,11.3c-0.3,2.3-1.8,4-5,6.3c-3.2,2.3-13.8,18.3-13.8,18.3 l-6.8,11.5c0,0-7.2-1.2-12,1.8c0,0-2.5-2-3.8-2.2l-1.2-3l-7.3,1l-7.7,10.3c0,0-47.3-36.8-50.5-37.8c-3.2-1-7.7-4-6.8-7 s4-10.3,4-10.3s-12.5-5.3-16.7-6.7c-4.2-1.3-11.2-2.7-14.7-4c-3.5-1.3-11.3-2.7-17.5-1.2c-6.2,1.5-13.5,0-19.8,4.3L283.4,327z"

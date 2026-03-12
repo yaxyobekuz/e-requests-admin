@@ -1,11 +1,12 @@
 // Components
 import MapWrapper from "./MapWrapper";
 
-const UzbekistanMap = ({ value, onChange }) => {
+const UzbekistanMap = ({ value, onChange, className }) => {
   return (
     <MapWrapper
       value={value}
       onChange={onChange}
+      className={className}
       viewBox="0 0 792.4873 516.87848"
     >
       <path
