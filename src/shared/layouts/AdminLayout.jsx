@@ -4,6 +4,7 @@ import {
   Users,
   MapPin,
   Wrench,
+  Sprout,
   FileText,
   Settings,
   Briefcase,
@@ -12,6 +13,7 @@ import {
   AlertTriangle,
   LayoutDashboard,
   SlidersHorizontal,
+  BarChart2,
 } from "lucide-react";
 
 // Utils
@@ -49,6 +51,7 @@ const AdminLayout = () => {
 const Sidebar = () => {
   const navItems = [
     { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { to: "/statistics", label: "Statistika", icon: BarChart2 },
     { isDivider: true },
     { to: "/requests", label: "Murojaatlar", icon: FileText },
     { to: "/service-reports", label: "Xizmat arizalari", icon: AlertTriangle },
@@ -57,6 +60,7 @@ const Sidebar = () => {
     { to: "/services", label: "Servislar", icon: Settings },
     { to: "/request-types", label: "Murojaat turlari", icon: Tags },
     { to: "/msk/categories", label: "MSK kategoriyalar", icon: Wrench },
+    { to: "/products", label: "Mahsulotlar", icon: Sprout },
     { to: "/regions", label: "Hududlar", icon: MapPin },
     { isDivider: true },
     { to: "/admins", label: "Adminlar", icon: Users },
