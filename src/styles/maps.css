@@ -1,0 +1,9 @@
+.map-wrapper-svg path,
+.map-wrapper-svg polygon {
+  @apply fill-blue-500 transition-colors cursor-pointer hover:fill-blue-800;
+}
+
+.map-wrapper-svg path.active,
+.map-wrapper-svg polygon.active {
+  @apply fill-green-500;
+}
