@@ -2,6 +2,7 @@
 import { adminsAPI } from "@/shared/api";
 
 // Components
+import KpiCard from "./KpiCard";
 import Card from "@/shared/components/ui/Card";
 
 // Tanstack query
@@ -21,28 +22,28 @@ const AdminStats = () => {
       <h2 className="text-lg font-semibold">Adminlar statistikasi</h2>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard
+        <KpiCard
           label="Jami adminlar"
           value={stats?.total}
-          icon={<Users className="w-5 h-5" />}
+          icon={<Users className="size-5" />}
           iconColor="bg-blue-50 text-blue-600"
         />
-        <StatCard
+        <KpiCard
           label="Faol"
           value={stats?.active}
-          icon={<UserCheck className="w-5 h-5" />}
+          icon={<UserCheck className="size-5" />}
           iconColor="bg-green-50 text-green-600"
         />
-        <StatCard
+        <KpiCard
           label="Nofaol"
           value={stats?.inactive}
-          icon={<UserX className="w-5 h-5" />}
+          icon={<UserX className="size-5" />}
           iconColor="bg-red-50 text-red-600"
         />
-        <StatCard
+        <KpiCard
           label="Tahrirlash huquqi bor"
           value={stats?.withDelegation}
-          icon={<Shield className="w-5 h-5" />}
+          icon={<Shield className="size-5" />}
           iconColor="bg-amber-50 text-amber-600"
         />
       </div>
@@ -75,20 +76,5 @@ const AdminStats = () => {
     </div>
   );
 };
-
-const StatCard = ({ label, value, icon, iconColor }) => (
-  <Card className="flex items-center gap-4">
-    <div
-      className={`size-10 rounded-lg flex items-center justify-center flex-shrink-0 ${iconColor}`}
-    >
-      {icon}
-    </div>
-
-    <div>
-      <p className="text-2xl font-bold text-gray-900">{value ?? "0"}</p>
-      <p className="text-sm text-gray-500">{label}</p>
-    </div>
-  </Card>
-);
 
 export default AdminStats;
