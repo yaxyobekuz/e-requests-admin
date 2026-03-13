@@ -1,10 +1,16 @@
+// Utils
+import { cn } from "@/shared/utils/cn";
+
 // Components
 import Card from "@/shared/components/ui/Card";
 
-const KpiCard = ({ label, value, icon, iconColor }) => (
-  <Card className="flex items-center gap-4">
+const KpiCard = ({ label, value, icon, iconColor, className = "" }) => (
+  <Card className={cn("flex items-center gap-4", className)}>
     <div
-      className={`size-10 rounded-lg flex items-center justify-center flex-shrink-0 ${iconColor}`}
+      className={cn(
+        "size-10 rounded-lg flex items-center justify-center flex-shrink-0",
+        iconColor,
+      )}
     >
       {icon}
     </div>

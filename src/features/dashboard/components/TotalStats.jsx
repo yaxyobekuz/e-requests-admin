@@ -77,7 +77,7 @@ const TotalStats = () => {
         icon={<Files className="size-5" strokeWidth={1.5} />}
       />
       <KpiCard
-        label="Jami murojaatlar"
+        label="Murojaatlar"
         value={<AnimatedNumber target={data?.requests ?? 0} />}
         iconColor="bg-blue-50 text-blue-600"
         icon={<FileText className="size-5" strokeWidth={1.5} />}
