@@ -1,35 +1,37 @@
-import { useQuery } from "@tanstack/react-query";
+// Recharts
 import {
-  ArrowLeft,
-  FileText,
-  AlertTriangle,
-  FolderKanban,
-  MapPin,
-  ExternalLink,
-} from "lucide-react";
-import { Link } from "react-router-dom";
-import {
-  PieChart,
   Pie,
   Cell,
-  Tooltip,
-  ResponsiveContainer,
   Legend,
+  Tooltip,
+  PieChart,
+  ResponsiveContainer,
 } from "recharts";
+
+// Icons
+import {
+  MapPin,
+  FileText,
+  ArrowLeft,
+  FolderKanban,
+  AlertTriangle,
+} from "lucide-react";
+
+// Utils
 import { cn } from "@/shared/utils/cn";
 
-// Hooks
-import useObjectState from "@/shared/hooks/useObjectState";
+// Map components
+import uzbekistanRegions, {
+  getRegionByLabel,
+} from "./map/data/uzbekistan.data";
+import UzbekistanMap from "./map/UzbekistanMap";
+
+// Tanstack Query
+import { useQuery } from "@tanstack/react-query";
 
 // APIs
 import { regionsAPI } from "@/shared/api";
 import { statsAPI } from "@/features/statistics/api";
-
-// Map components
-import UzbekistanMap from "./map/UzbekistanMap";
-import uzbekistanRegions, {
-  getRegionByLabel,
-} from "./map/data/uzbekistan.data";
 
 // Data
 import {
@@ -37,16 +39,14 @@ import {
   REQUEST_STATUS_LABELS,
 } from "@/features/statistics/data/statistics.data";
 
-// UI
+// Components
+import KpiCard from "./KpiCard";
 import Card from "@/shared/components/ui/Card";
 import Button from "@/shared/components/ui/button/Button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/components/shadcn/select";
+import Select from "@/shared/components/ui/select/Select";
+
+// Hooks
+import useObjectState from "@/shared/hooks/useObjectState";
 
 const StatsByMap = () => {
   const {
@@ -168,7 +168,7 @@ const StatsByMap = () => {
     });
   };
 
-  const handleClear = () => {
+  const handleBackToUzbekistan = () => {
     setFields({
       selectedRegion: null,
       selectedRegionId: null,
@@ -177,55 +177,35 @@ const StatsByMap = () => {
     });
   };
 
-  const statsLink = selectedDistrictId
-    ? `/statistics?regionId=${selectedRegionId}&districtId=${selectedDistrictId}`
-    : selectedRegionId
-      ? `/statistics?regionId=${selectedRegionId}`
-      : "/statistics";
-
   return (
     <div className="mb-4 grid grid-cols-2 gap-4">
       {/* Left col: map + selects */}
-      <div className="">
+      <div>
         <div className="flex items-center gap-4 mb-4">
           <Select
+            className="flex-1"
+            onChange={handleSelectRegion}
             value={selectedRegionId || ""}
-            onValueChange={handleSelectRegion}
-          >
-            <SelectTrigger className="border border-gray-200 rounded-xl bg-gray-50 text-sm h-9">
-              <SelectValue placeholder="Viloyatni tanlang" />
-            </SelectTrigger>
-            <SelectContent>
-              {regionsList.map((r) => (
-                <SelectItem key={r._id} value={r._id}>
-                  {r.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            placeholder="Viloyatni tanlang"
+            triggerClassName="rounded-2xl border-none"
+            options={regionsList.map((region) => ({
+              value: region._id,
+              label: region.name,
+            }))}
+          />
 
           <Select
-            value={selectedDistrictId || ""}
-            onValueChange={handleSelectDistrict}
+            className="flex-1"
             disabled={!selectedRegionId}
-          >
-            <SelectTrigger className="border border-gray-200 rounded-xl bg-gray-50 text-sm h-9 disabled:opacity-40">
-              <SelectValue
-                placeholder={
-                  selectedRegionId
-                    ? "Tumanni tanlang"
-                    : "Avval viloyatni tanlang"
-                }
-              />
-            </SelectTrigger>
-            <SelectContent>
-              {districtsList.map((d) => (
-                <SelectItem key={d._id} value={d._id}>
-                  {d.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            placeholder="Tumanni tanlang"
+            onChange={handleSelectDistrict}
+            value={selectedDistrictId || ""}
+            triggerClassName="rounded-2xl border-none"
+            options={districtsList.map((district) => ({
+              value: district._id,
+              label: district.name,
+            }))}
+          />
         </div>
 
         {/* Map */}
@@ -260,7 +240,7 @@ const StatsByMap = () => {
 
           {selectedRegion && (
             <Button
-              onClick={handleClear}
+              onClick={handleBackToUzbekistan}
               className="absolute top-5 left-5 animate__animated animate__fadeIn"
             >
               <ArrowLeft strokeWidth={1.5} className="size-3.5" />
@@ -271,18 +251,17 @@ const StatsByMap = () => {
       </div>
 
       {/* Right col: stats panel */}
-      <div className="">
+      <div>
         {!selectedRegionId ? (
           <EmptyState />
         ) : (
           <StatsPanel
-            regionName={selectedRegion}
-            districtName={selectedDistrict}
             overview={overview}
             reqStats={reqStats}
-            overviewLoading={overviewLoading}
             reqLoading={reqLoading}
-            statsLink={statsLink}
+            regionName={selectedRegion}
+            districtName={selectedDistrict}
+            overviewLoading={overviewLoading}
           />
         )}
       </div>
@@ -290,7 +269,6 @@ const StatsByMap = () => {
   );
 };
 
-/** Placeholder shown when no region is selected */
 const EmptyState = () => (
   <Card className="h-full flex flex-col items-center justify-center text-center gap-3 min-h-64">
     <div className="size-14 bg-blue-50 rounded-2xl flex items-center justify-center">
@@ -299,18 +277,13 @@ const EmptyState = () => (
     <div>
       <p className="font-semibold text-gray-700">Hududni tanlang</p>
       <p className="text-sm text-gray-400 mt-1">
-        Xaritada viloyatni bosing yoki yuqoridagi selectdan tanlang
+        Xaritada viloyatni bosing yoki yuqoridagi <br /> variantlardan birini
+        tanlang
       </p>
     </div>
   </Card>
 );
 
-/**
- * Live stats panel for a selected region/district.
- *
- * @param {{ regionName, districtName, overview, reqStats, overviewLoading, reqLoading, statsLink }} props
- * @returns {JSX.Element}
- */
 const StatsPanel = ({
   regionName,
   districtName,
@@ -318,7 +291,6 @@ const StatsPanel = ({
   reqStats,
   overviewLoading,
   reqLoading,
-  statsLink,
 }) => {
   const byStatus = reqStats?.byStatus || [];
   const total = byStatus.reduce((s, x) => s + x.count, 0);
@@ -332,44 +304,38 @@ const StatsPanel = ({
   }));
 
   return (
-    <div className="flex flex-col gap-3 h-full">
+    <div className="flex flex-col gap-4 h-full">
       {/* Region header */}
-      <Card className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-          <div className="size-8 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
-            <MapPin className="size-4 text-blue-600" strokeWidth={1.5} />
-          </div>
-          <div>
-            <p className="font-semibold text-gray-900 leading-tight">
-              {districtName ? `${regionName} — ${districtName}` : regionName}
-            </p>
-            <p className="text-xs text-gray-400">So'nggi 30 kun statistikasi</p>
-          </div>
-        </div>
+      <Card className="flex items-center gap-2.5 h-10 !py-0 !px-3.5">
+        <MapPin className="size-4 text-blue-600" strokeWidth={1.5} />
+        <p className="font-semibold text-gray-900 leading-tight">
+          {districtName ? `${regionName} - ${districtName}` : regionName}
+        </p>
       </Card>
 
       {/* KPI mini-cards */}
-      <div className="grid grid-cols-3 gap-3">
-        <MiniKpi
+      <div className="grid grid-cols-2 gap-4">
+        <KpiCard
           label="Murojaatlar"
-          value={overview?.requests}
           loading={overviewLoading}
-          icon={<FileText className="size-4" strokeWidth={1.5} />}
-          color="text-blue-600 bg-blue-50"
+          value={overview?.requests}
+          iconColor="text-blue-600 bg-blue-50"
+          icon={<FileText className="size-5" strokeWidth={1.5} />}
         />
-        <MiniKpi
+        <KpiCard
           label="Xizmat arizalari"
           value={overview?.services}
           loading={overviewLoading}
-          icon={<AlertTriangle className="size-4" strokeWidth={1.5} />}
-          color="text-yellow-600 bg-yellow-50"
+          iconColor="text-yellow-600 bg-yellow-50"
+          icon={<AlertTriangle className="size-5" strokeWidth={1.5} />}
         />
-        <MiniKpi
-          label="MSK buyurtmalar"
+        <KpiCard
           value={overview?.msk}
+          className="col-span-2"
+          label="MSK buyurtmalar"
           loading={overviewLoading}
-          icon={<FolderKanban className="size-4" strokeWidth={1.5} />}
-          color="text-pink-600 bg-pink-50"
+          iconColor="text-pink-600 bg-pink-50"
+          icon={<FolderKanban className="size-5" strokeWidth={1.5} />}
         />
       </div>
 
@@ -428,12 +394,14 @@ const StatsPanel = ({
               {resolvedPct}%
             </span>
           </div>
+
           <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-3">
             <div
-              className="h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full transition-all duration-700"
               style={{ width: `${resolvedPct}%` }}
+              className="h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full transition-all duration-700"
             />
           </div>
+
           {reqLoading ? (
             <div className="space-y-2">
               {[1, 2, 3].map((i) => (
@@ -476,31 +444,5 @@ const StatsPanel = ({
     </div>
   );
 };
-
-/**
- * Mini KPI card for the stats panel.
- *
- * @param {{ label: string, value: number, loading: boolean, icon: JSX.Element, color: string }} props
- * @returns {JSX.Element}
- */
-const MiniKpi = ({ label, value, loading, icon, color }) => (
-  <Card className="flex items-center gap-3 py-3">
-    <div
-      className={`size-8 rounded-xl flex items-center justify-center flex-shrink-0 ${color}`}
-    >
-      {icon}
-    </div>
-    <div className="min-w-0">
-      {loading ? (
-        <div className="h-5 w-10 bg-gray-200 rounded animate-pulse mb-1" />
-      ) : (
-        <p className="text-xl font-bold text-gray-900 leading-none">
-          {value ?? 0}
-        </p>
-      )}
-      <p className="text-[10px] text-gray-500 truncate">{label}</p>
-    </div>
-  </Card>
-);
 
 export default StatsByMap;
