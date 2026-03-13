@@ -7,6 +7,7 @@ import KhorezmMap from "../KhorezmMap";
 import SyrdaryaMap from "../SyrdaryaMap";
 import NamanganMap from "../NamanganMap";
 import TashkentMap from "../TashkentMap";
+import SamarkandMap from "../SamarkandMap";
 import KashkadaryaMap from "../KashkadaryaMap";
 import TashkentCityMap from "../TashkentCityMap";
 import SurkhandaryaMap from "../SurkhandaryaMap";
@@ -22,7 +23,7 @@ const uzbekistanRegions = [
   { component: NavoiMap, label: "Navoiy viloyati" },
   { component: KashkadaryaMap, label: "Qashqadaryo viloyati" },
   { component: KarakalpakstanMap, label: "Qoraqalpog'iston Respublikasi" },
-  { component: AndijanMap, label: "Samarqand viloyati" },
+  { component: SamarkandMap, label: "Samarqand viloyati" },
   { component: SyrdaryaMap, label: "Sirdaryo viloyati" },
   { component: SurkhandaryaMap, label: "Surxondaryo viloyati" },
   { component: TashkentCityMap, label: "Toshkent Shahri" },

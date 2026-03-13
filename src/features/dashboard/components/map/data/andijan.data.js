@@ -2,7 +2,7 @@
 const andijanDistricts = [
   { label: "Ulug'nor tumani" },
   { label: "Baliqchi tumani" },
-  { label: "Bo'z tumani" },
+  { label: "Bo'ston tumani" },
   { label: "Shahrixon tumani" },
   { label: "Izboskan tumani" },
   { label: "Asaka tumani" },
