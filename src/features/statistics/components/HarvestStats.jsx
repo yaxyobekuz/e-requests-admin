@@ -1,15 +1,17 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+// Icons
 import {
-  BarChart,
   Bar,
+  Cell,
   XAxis,
   YAxis,
   Tooltip,
-  ResponsiveContainer,
+  BarChart,
   CartesianGrid,
-  Cell,
+  ResponsiveContainer,
 } from "recharts";
+
+// React
+import { useState } from "react";
 
 // API
 import { statsAPI } from "../api";
@@ -18,16 +20,19 @@ import { productsAPI } from "@/shared/api";
 // Components
 import Card from "@/shared/components/ui/Card";
 
-// Data
-import { HARVEST_SEASON_LABELS } from "../data/statistics.data";
+// Tanstack Query
+import { useQuery } from "@tanstack/react-query";
 
-/** Chart color palette for products */
-const COLORS = ["#22C55E", "#3B82F6", "#F59E0B", "#EC4899", "#8B5CF6", "#F97316", "#14B8A6"];
+const COLORS = [
+  "#22C55E",
+  "#3B82F6",
+  "#F59E0B",
+  "#EC4899",
+  "#8B5CF6",
+  "#F97316",
+  "#14B8A6",
+];
 
-/**
- * Custom bar chart tooltip.
- * @param {{ active: boolean, payload: Array, label: string }} props
- */
 const HarvestTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
@@ -40,20 +45,15 @@ const HarvestTooltip = ({ active, payload, label }) => {
       {payload[0]?.payload?.count && (
         <div className="flex items-center justify-between gap-4 mt-0.5">
           <span className="text-gray-400 text-xs">Ma'lumotlar</span>
-          <span className="text-gray-600 text-xs">{payload[0].payload.count} ta</span>
+          <span className="text-gray-600 text-xs">
+            {payload[0].payload.count} ta
+          </span>
         </div>
       )}
     </div>
   );
 };
 
-/**
- * HarvestStats — hosil statistikasini mahsulot va hudud bo'yicha ko'rsatadi.
- * Admin statistika sahifasidagi "Tomorqa" tabida ishlatiladi.
- *
- * @param {{ filters: { period: string, regionId: string|null, districtId: string|null } }} props
- * @returns {JSX.Element}
- */
 const HarvestStats = ({ filters }) => {
   const [selectedProductId, setSelectedProductId] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
@@ -72,13 +72,15 @@ const HarvestStats = ({ filters }) => {
 
   const { data: overview = [], isLoading: overviewLoading } = useQuery({
     queryKey: ["stats", "harvest", "overview", harvestParams],
-    queryFn: () => statsAPI.getHarvestOverview(harvestParams).then((r) => r.data),
+    queryFn: () =>
+      statsAPI.getHarvestOverview(harvestParams).then((r) => r.data),
     refetchInterval: 60_000,
   });
 
   const { data: byRegion = [], isLoading: regionLoading } = useQuery({
     queryKey: ["stats", "harvest", "by-region", harvestParams],
-    queryFn: () => statsAPI.getHarvestByRegion(harvestParams).then((r) => r.data),
+    queryFn: () =>
+      statsAPI.getHarvestByRegion(harvestParams).then((r) => r.data),
     refetchInterval: 60_000,
   });
 
@@ -86,32 +88,34 @@ const HarvestStats = ({ filters }) => {
   const yearOptions = Array.from({ length: 6 }, (_, i) => currentYear - i);
 
   // Build bar chart data grouped by product name
-  const productChartData = overview.reduce((acc, item) => {
-    const existing = acc.find((x) => x.name === item.productName);
-    if (!existing) {
-      acc.push({
-        name: item.productName,
-        avgPerSotix: item.avgPerSotix,
-        count: item.count,
-      });
-    } else {
-      // Average when multiple varieties
-      existing.avgPerSotix = parseFloat(
-        ((existing.avgPerSotix + item.avgPerSotix) / 2).toFixed(2)
-      );
-      existing.count += item.count;
-    }
-    return acc;
-  }, []).sort((a, b) => b.avgPerSotix - a.avgPerSotix);
+  const productChartData = overview
+    .reduce((acc, item) => {
+      const existing = acc.find((x) => x.name === item.productName);
+      if (!existing) {
+        acc.push({
+          name: item.productName,
+          avgPerSotix: item.avgPerSotix,
+          count: item.count,
+        });
+      } else {
+        // Average when multiple varieties
+        existing.avgPerSotix = parseFloat(
+          ((existing.avgPerSotix + item.avgPerSotix) / 2).toFixed(2),
+        );
+        existing.count += item.count;
+      }
+      return acc;
+    }, [])
+    .sort((a, b) => b.avgPerSotix - a.avgPerSotix);
 
   return (
     <div className="space-y-4">
       {/* Filters row */}
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex gap-4">
         <select
           value={selectedProductId}
           onChange={(e) => setSelectedProductId(e.target.value)}
-          className="px-3 py-2 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-500"
         >
           <option value="">Barcha mahsulotlar</option>
           {products.map((p) => (
@@ -120,10 +124,11 @@ const HarvestStats = ({ filters }) => {
             </option>
           ))}
         </select>
+
         <select
           value={selectedYear}
           onChange={(e) => setSelectedYear(e.target.value)}
-          className="px-3 py-2 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-500"
         >
           <option value="">Barcha yillar</option>
           {yearOptions.map((y) => (
@@ -135,20 +140,36 @@ const HarvestStats = ({ filters }) => {
       </div>
 
       {/* Bar chart by product */}
-      <Card title="Mahsulotlar bo'yicha o'rtacha hosil (kg/sotix)">
+      <Card
+        className="space-y-4"
+        title="Mahsulotlar bo'yicha o'rtacha hosil (kg/sotix)"
+      >
         {overviewLoading ? (
           <div className="h-64 bg-gray-100 rounded-xl animate-pulse" />
         ) : productChartData.length === 0 ? (
-          <p className="text-sm text-gray-400 text-center py-16">Ma'lumot topilmadi</p>
+          <p className="text-sm text-gray-400 text-center py-16">
+            Ma'lumot topilmadi
+          </p>
         ) : (
-          <ResponsiveContainer width="100%" height={Math.max(240, productChartData.length * 44 + 60)}>
+          <ResponsiveContainer
+            width="100%"
+            height={Math.max(240, productChartData.length * 44 + 60)}
+          >
             <BarChart
               data={productChartData}
               layout="vertical"
               margin={{ top: 4, right: 24, left: 4, bottom: 0 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" horizontal={false} />
-              <XAxis type="number" tick={{ fontSize: 10, fill: "#9CA3AF" }} unit=" kg" />
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="#F3F4F6"
+                horizontal={false}
+              />
+              <XAxis
+                type="number"
+                tick={{ fontSize: 10, fill: "#9CA3AF" }}
+                unit=" kg"
+              />
               <YAxis
                 type="category"
                 dataKey="name"
@@ -167,7 +188,7 @@ const HarvestStats = ({ filters }) => {
       </Card>
 
       {/* Detailed overview table */}
-      <Card title="Batafsil jadval (mahsulot / nav / hudud)">
+      <Card className="space-y-4" title="Batafsil jadval">
         {overviewLoading ? (
           <div className="space-y-2">
             {[1, 2, 3].map((i) => (
@@ -175,19 +196,35 @@ const HarvestStats = ({ filters }) => {
             ))}
           </div>
         ) : overview.length === 0 ? (
-          <p className="text-sm text-gray-400 text-center py-12">Ma'lumot topilmadi</p>
+          <p className="text-sm text-gray-400 text-center py-12">
+            Ma'lumot topilmadi
+          </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100">
-                  <th className="text-left py-2 pr-3 text-gray-500 font-medium">Mahsulot</th>
-                  <th className="text-left py-2 px-2 text-gray-500 font-medium">Nav</th>
-                  <th className="text-left py-2 px-2 text-gray-500 font-medium">Hudud</th>
-                  <th className="text-right py-2 px-2 text-emerald-600 font-medium">O'rtacha</th>
-                  <th className="text-right py-2 px-2 text-blue-600 font-medium">Min</th>
-                  <th className="text-right py-2 px-2 text-orange-500 font-medium">Max</th>
-                  <th className="text-right py-2 pl-2 text-gray-500 font-medium">Soni</th>
+                  <th className="text-left py-2 pr-3 text-gray-500 font-medium">
+                    Mahsulot
+                  </th>
+                  <th className="text-left py-2 px-2 text-gray-500 font-medium">
+                    Nav
+                  </th>
+                  <th className="text-left py-2 px-2 text-gray-500 font-medium">
+                    Hudud
+                  </th>
+                  <th className="text-right py-2 px-2 text-emerald-600 font-medium">
+                    O'rtacha
+                  </th>
+                  <th className="text-right py-2 px-2 text-blue-600 font-medium">
+                    Min
+                  </th>
+                  <th className="text-right py-2 px-2 text-orange-500 font-medium">
+                    Max
+                  </th>
+                  <th className="text-right py-2 pl-2 text-gray-500 font-medium">
+                    Soni
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -196,15 +233,27 @@ const HarvestStats = ({ filters }) => {
                     key={i}
                     className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
                   >
-                    <td className="py-2 pr-3 text-gray-800 font-medium">{row.productName}</td>
-                    <td className="py-2 px-2 text-gray-600">{row.varietyName}</td>
-                    <td className="py-2 px-2 text-gray-500">{row.regionName || "—"}</td>
+                    <td className="py-2 pr-3 text-gray-800 font-medium">
+                      {row.productName}
+                    </td>
+                    <td className="py-2 px-2 text-gray-600">
+                      {row.varietyName}
+                    </td>
+                    <td className="py-2 px-2 text-gray-500">
+                      {row.regionName || "—"}
+                    </td>
                     <td className="py-2 px-2 text-right font-semibold text-emerald-700">
                       {row.avgPerSotix} kg
                     </td>
-                    <td className="py-2 px-2 text-right text-blue-600">{row.minPerSotix} kg</td>
-                    <td className="py-2 px-2 text-right text-orange-500">{row.maxPerSotix} kg</td>
-                    <td className="py-2 pl-2 text-right text-gray-500">{row.count}</td>
+                    <td className="py-2 px-2 text-right text-blue-600">
+                      {row.minPerSotix} kg
+                    </td>
+                    <td className="py-2 px-2 text-right text-orange-500">
+                      {row.maxPerSotix} kg
+                    </td>
+                    <td className="py-2 pl-2 text-right text-gray-500">
+                      {row.count}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -214,11 +263,13 @@ const HarvestStats = ({ filters }) => {
       </Card>
 
       {/* By region */}
-      <Card title="Hududlar bo'yicha hosil">
+      <Card title="Hududlar bo'yicha hosil" className="space-y-4">
         {regionLoading ? (
           <div className="h-48 bg-gray-100 rounded-xl animate-pulse" />
         ) : byRegion.length === 0 ? (
-          <p className="text-sm text-gray-400 text-center py-12">Ma'lumot topilmadi</p>
+          <p className="text-sm text-gray-400 text-center py-12">
+            Ma'lumot topilmadi
+          </p>
         ) : (
           <div className="space-y-2">
             {byRegion.map((r, i) => {
