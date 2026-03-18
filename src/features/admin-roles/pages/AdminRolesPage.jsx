@@ -14,7 +14,11 @@ import {
   MODAL_CREATE_TITLE,
   MODAL_EDIT_TITLE,
   COL_NAME,
-  COL_DESCRIPTION,
+  COL_REQUESTS,
+  COL_SERVICES,
+  COL_MSK,
+  BADGE_ALLOWED,
+  BADGE_BLOCKED,
   MSG_EMPTY,
   MSG_DELETE_CONFIRM,
   MSG_DELETED,
@@ -60,8 +64,18 @@ const AdminRolesPage = () => {
         <table className="w-full">
           <thead className="bg-gray-50 border-b">
             <tr>
-              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">{COL_NAME}</th>
-              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">{COL_DESCRIPTION}</th>
+              <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">
+                {COL_NAME}
+              </th>
+              <th className="text-center px-4 py-3 text-sm font-medium text-gray-500">
+                {COL_REQUESTS}
+              </th>
+              <th className="text-center px-4 py-3 text-sm font-medium text-gray-500">
+                {COL_SERVICES}
+              </th>
+              <th className="text-center px-4 py-3 text-sm font-medium text-gray-500">
+                {COL_MSK}
+              </th>
               <th className="text-right px-4 py-3 text-sm font-medium text-gray-500"></th>
             </tr>
           </thead>
@@ -69,11 +83,27 @@ const AdminRolesPage = () => {
             {roles.map((role) => (
               <tr key={role._id} className="hover:bg-gray-50">
                 <td className="px-4 py-3 text-sm font-medium">{role.name}</td>
-                <td className="px-4 py-3 text-sm text-gray-500">{role.description || "—"}</td>
+                {["requests", "services", "msk"].map((mod) => (
+                  <td key={mod} className="px-4 py-3 text-center">
+                    <span
+                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                        role.executionPermissions?.[mod]
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {role.executionPermissions?.[mod]
+                        ? BADGE_ALLOWED
+                        : BADGE_BLOCKED}
+                    </span>
+                  </td>
+                ))}
                 <td className="px-4 py-3 text-right">
                   <div className="flex items-center justify-end gap-1">
                     <Button
-                      onClick={() => dispatch(open({ modal: "editAdminRole", data: role }))}
+                      onClick={() =>
+                        dispatch(open({ modal: "editAdminRole", data: role }))
+                      }
                       variant="ghost"
                       size="icon"
                       className="p-1.5"
@@ -82,7 +112,8 @@ const AdminRolesPage = () => {
                     </Button>
                     <Button
                       onClick={() => {
-                        if (confirm(MSG_DELETE_CONFIRM)) deleteMutation.mutate(role._id);
+                        if (confirm(MSG_DELETE_CONFIRM))
+                          deleteMutation.mutate(role._id);
                       }}
                       variant="ghost"
                       size="icon"
@@ -112,4 +143,3 @@ const AdminRolesPage = () => {
 };
 
 export default AdminRolesPage;
-
