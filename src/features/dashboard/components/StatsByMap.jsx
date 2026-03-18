@@ -8,30 +8,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-// Icons
-import {
-  MapPin,
-  FileText,
-  ArrowLeft,
-  FolderKanban,
-  AlertTriangle,
-} from "lucide-react";
-
-// Utils
-import { cn } from "@/shared/utils/cn";
-
-// Map components
-import uzbekistanRegions, {
-  getRegionByLabel,
-} from "./map/data/uzbekistan.data";
-import UzbekistanMap from "./map/UzbekistanMap";
-
 // Tanstack Query
 import { useQuery } from "@tanstack/react-query";
-
-// APIs
-import { regionsAPI } from "@/shared/api";
-import { statsAPI } from "@/features/statistics/api";
 
 // Data
 import {
@@ -39,14 +17,19 @@ import {
   REQUEST_STATUS_LABELS,
 } from "@/features/statistics/data/statistics.data";
 
-// Components
-import KpiCard from "./KpiCard";
-import Card from "@/shared/components/ui/Card";
-import Button from "@/shared/components/ui/button/Button";
-import Select from "@/shared/components/ui/select/Select";
+// APIs
+import { statsAPI } from "@/features/statistics/api";
 
 // Hooks
 import useObjectState from "@/shared/hooks/useObjectState";
+
+// Icons
+import { MapPin, FileText, FolderKanban, AlertTriangle } from "lucide-react";
+
+// Components
+import KpiCard from "./KpiCard";
+import Card from "@/shared/components/ui/Card";
+import RegionDistrictPicker from "@/shared/components/ui/RegionDistrictPicker";
 
 const StatsByMap = () => {
   const {
@@ -60,22 +43,6 @@ const StatsByMap = () => {
     selectedRegionId: null,
     selectedDistrict: null,
     selectedDistrictId: null,
-  });
-
-  const { data: regionsList = [] } = useQuery({
-    queryKey: ["regions", "list", "region"],
-    queryFn: () => regionsAPI.getAll({ type: "region" }).then((r) => r.data),
-    staleTime: 10 * 60 * 1000,
-  });
-
-  const { data: districtsList = [] } = useQuery({
-    queryKey: ["regions", "list", "district", selectedRegionId],
-    queryFn: () =>
-      regionsAPI
-        .getAll({ type: "district", parent: selectedRegionId })
-        .then((r) => r.data),
-    enabled: !!selectedRegionId,
-    staleTime: 10 * 60 * 1000,
   });
 
   const { data: overview, isLoading: overviewLoading } = useQuery({
@@ -122,133 +89,29 @@ const StatsByMap = () => {
     refetchInterval: 60_000,
   });
 
-  const RegionMapComponent =
-    getRegionByLabel(selectedRegion)?.component ||
-    uzbekistanRegions[0].component;
-
-  const handleMapRegionClick = (label) => {
-    const region = regionsList.find(
-      (r) => r.name.trim().toLowerCase() === label?.trim().toLowerCase(),
-    );
+  const handleRegionChange = (regionId, regionName) => {
     setFields({
-      selectedRegion: label,
-      selectedRegionId: region?._id || null,
+      selectedRegion: regionName,
+      selectedRegionId: regionId,
       selectedDistrict: null,
       selectedDistrictId: null,
     });
   };
 
-  const handleMapDistrictClick = (label) => {
-    const district = districtsList.find(
-      (d) => d.name.trim().toLowerCase() === label?.trim().toLowerCase(),
-    );
+  const handleDistrictChange = (districtId, districtName) => {
     setFields({
-      selectedDistrict: label,
-      selectedDistrictId: district?._id || null,
-    });
-  };
-
-  const handleSelectRegion = (regionId) => {
-    const region = regionsList.find((r) => r._id === regionId);
-    if (!region) return;
-    setFields({
-      selectedRegion: region.name,
-      selectedRegionId: region._id,
-      selectedDistrict: null,
-      selectedDistrictId: null,
-    });
-  };
-
-  const handleSelectDistrict = (districtId) => {
-    const district = districtsList.find((d) => d._id === districtId);
-    if (!district) return;
-    setFields({
-      selectedDistrict: district.name,
-      selectedDistrictId: district._id,
-    });
-  };
-
-  const handleBackToUzbekistan = () => {
-    setFields({
-      selectedRegion: null,
-      selectedRegionId: null,
-      selectedDistrict: null,
-      selectedDistrictId: null,
+      selectedDistrict: districtName,
+      selectedDistrictId: districtId,
     });
   };
 
   return (
     <div className="mb-4 grid grid-cols-2 gap-4">
       {/* Left col: map + selects */}
-      <div>
-        <div className="flex items-center gap-4 mb-4">
-          <Select
-            className="flex-1"
-            onChange={handleSelectRegion}
-            value={selectedRegionId || ""}
-            placeholder="Viloyatni tanlang"
-            triggerClassName="rounded-2xl border-none"
-            options={regionsList.map((region) => ({
-              value: region._id,
-              label: region.name,
-            }))}
-          />
-
-          <Select
-            className="flex-1"
-            disabled={!selectedRegionId}
-            placeholder="Tumanni tanlang"
-            onChange={handleSelectDistrict}
-            value={selectedDistrictId || ""}
-            triggerClassName="rounded-2xl border-none"
-            options={districtsList.map((district) => ({
-              value: district._id,
-              label: district.name,
-            }))}
-          />
-        </div>
-
-        {/* Map */}
-        <Card className="relative">
-          {/* Uzbekistan map */}
-          <UzbekistanMap
-            value={selectedRegion}
-            className={cn(
-              "w-full h-auto aspect-square origin-bottom transition-all duration-500",
-              selectedRegion
-                ? "scale-0 opacity-0 pointer-events-none"
-                : "scale-100 opacity-100",
-            )}
-            onChange={handleMapRegionClick}
-          />
-
-          {/* Regional (district-level) map */}
-          <div
-            className={cn(
-              "absolute inset-0 w-full h-auto aspect-square origin-top transition-all duration-500",
-              selectedRegion
-                ? "scale-100 opacity-100"
-                : "scale-0 opacity-0 pointer-events-none",
-            )}
-          >
-            <RegionMapComponent
-              value={selectedDistrict}
-              onChange={handleMapDistrictClick}
-              className="w-full h-auto aspect-square"
-            />
-          </div>
-
-          {selectedRegion && (
-            <Button
-              onClick={handleBackToUzbekistan}
-              className="absolute top-5 left-5 animate__animated animate__fadeIn"
-            >
-              <ArrowLeft strokeWidth={1.5} className="size-3.5" />
-              O'zbekiston xaritasiga qaytish
-            </Button>
-          )}
-        </Card>
-      </div>
+      <RegionDistrictPicker
+        onRegionChange={handleRegionChange}
+        onDistrictChange={handleDistrictChange}
+      />
 
       {/* Right col: stats panel */}
       <div>
@@ -269,28 +132,13 @@ const StatsByMap = () => {
   );
 };
 
-const EmptyState = () => (
-  <Card className="h-full flex flex-col items-center justify-center text-center gap-3 min-h-64">
-    <div className="size-14 bg-blue-50 rounded-2xl flex items-center justify-center">
-      <MapPin className="size-7 text-blue-400" strokeWidth={1.5} />
-    </div>
-    <div>
-      <p className="font-semibold text-gray-700">Hududni tanlang</p>
-      <p className="text-sm text-gray-400 mt-1">
-        Xaritada viloyatni bosing yoki yuqoridagi <br /> variantlardan birini
-        tanlang
-      </p>
-    </div>
-  </Card>
-);
-
 const StatsPanel = ({
-  regionName,
-  districtName,
   overview,
   reqStats,
-  overviewLoading,
+  regionName,
   reqLoading,
+  districtName,
+  overviewLoading,
 }) => {
   const byStatus = reqStats?.byStatus || [];
   const total = byStatus.reduce((s, x) => s + x.count, 0);
@@ -444,5 +292,29 @@ const StatsPanel = ({
     </div>
   );
 };
+
+const EmptyState = () => (
+  <div className="flex flex-col gap-4 h-full">
+    {/* Top */}
+    <Card className="flex items-center gap-2.5 h-10 !py-0 !px-3.5">
+      <MapPin className="size-4 text-blue-600" strokeWidth={1.5} />
+      <p className="font-semibold text-gray-900 leading-tight">O'zbekiston</p>
+    </Card>
+
+    {/* Main */}
+    <Card className="flex flex-col items-center justify-center text-center gap-3 min-h-64 grow">
+      <div className="size-14 bg-blue-50 rounded-2xl flex items-center justify-center">
+        <MapPin className="size-7 text-blue-400" strokeWidth={1.5} />
+      </div>
+      <div>
+        <p className="font-semibold text-gray-700">Hududni tanlang</p>
+        <p className="text-sm text-gray-400 mt-1">
+          Xaritada viloyatni bosing yoki yuqoridagi <br /> variantlardan birini
+          tanlang
+        </p>
+      </div>
+    </Card>
+  </div>
+);
 
 export default StatsByMap;
