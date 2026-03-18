@@ -5,41 +5,40 @@ import { toast } from "sonner";
 import { adminRolesAPI } from "@/shared/api";
 import Button from "@/shared/components/ui/button/Button";
 import InputField from "@/shared/components/ui/input/InputField";
-import InputGroup from "@/shared/components/ui/input/InputGroup";
+import { Switch } from "@/shared/components/shadcn/switch";
 
 import {
-  ERR_NAME_REQUIRED,
-  LABEL_DESCRIPTION,
   LABEL_NAME,
   MSG_CREATED,
   MSG_UPDATED,
-  PLACEHOLDER_DESCRIPTION,
   PLACEHOLDER_NAME,
+  EXECUTION_MODULES,
+  ERR_NAME_REQUIRED,
+  LABEL_EXECUTION_PERMISSIONS,
 } from "../pages/AdminRolesPage.data";
 
-/**
- * Create or edit admin role modal form.
- * @param {Object} props - Modal form props from ModalWrapper.
- * @param {"create"|"edit"} props.mode - Form mode.
- * @param {string} [props._id] - Role id for edit mode.
- * @param {string} [props.name] - Initial role name.
- * @param {string} [props.description] - Initial role description.
- * @param {Function} props.close - Closes current modal.
- * @param {boolean} props.isLoading - Current submit loading state.
- * @param {Function} props.setIsLoading - Updates submit loading state.
- * @returns {JSX.Element} Admin role form.
- */
+const DEFAULT_EXECUTION_PERMISSIONS = {
+  msk: false,
+  requests: false,
+  services: false,
+};
+
 const AdminRoleForm = ({
   mode,
   _id,
   name = "",
-  description = "",
+  executionPermissions,
   close,
   isLoading,
   setIsLoading,
 }) => {
   const queryClient = useQueryClient();
-  const [form, setForm] = useState({ name, description });
+  const [form, setForm] = useState({
+    name,
+    executionPermissions: executionPermissions
+      ? { ...DEFAULT_EXECUTION_PERMISSIONS, ...executionPermissions }
+      : { ...DEFAULT_EXECUTION_PERMISSIONS },
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -68,29 +67,44 @@ const AdminRoleForm = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
-      <InputGroup className="gap-3">
-        <InputField
-          name="name"
-          label={LABEL_NAME}
-          value={form.name}
-          onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-          placeholder={PLACEHOLDER_NAME}
-        />
+      <InputField
+        name="name"
+        label={LABEL_NAME}
+        value={form.name}
+        onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+        placeholder={PLACEHOLDER_NAME}
+      />
 
-        <div>
-          <label className="block text-sm font-medium mb-1">{LABEL_DESCRIPTION}</label>
-          <textarea
-            value={form.description}
-            onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
-            className="w-full px-3 py-2 border rounded-lg resize-none"
-            rows={3}
-            placeholder={PLACEHOLDER_DESCRIPTION}
-          />
-        </div>
-      </InputGroup>
+      <div className="space-y-3">
+        <label className="block text-sm font-medium">
+          {LABEL_EXECUTION_PERMISSIONS}
+        </label>
+        {EXECUTION_MODULES.map(({ key, label }) => (
+          <div key={key} className="flex items-center justify-between">
+            <span className="text-sm text-gray-600">{label}</span>
+            <Switch
+              checked={form.executionPermissions[key]}
+              onCheckedChange={(checked) =>
+                setForm((prev) => ({
+                  ...prev,
+                  executionPermissions: {
+                    ...prev.executionPermissions,
+                    [key]: checked,
+                  },
+                }))
+              }
+              className="data-[state=checked]:bg-green-500"
+            />
+          </div>
+        ))}
+      </div>
 
       <Button type="submit" disabled={isLoading} className="w-full">
-        {isLoading ? "Saqlanmoqda..." : mode === "create" ? "Yaratish" : "Saqlash"}
+        {isLoading
+          ? "Saqlanmoqda..."
+          : mode === "create"
+            ? "Yaratish"
+            : "Saqlash"}
       </Button>
     </form>
   );
