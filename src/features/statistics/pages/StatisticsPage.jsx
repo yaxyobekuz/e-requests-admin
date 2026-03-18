@@ -1,35 +1,31 @@
+// React
 import { useState } from "react";
-import { BarChart2 } from "lucide-react";
-
-// Hooks
-import useObjectState from "@/shared/hooks/useObjectState";
 
 // Data
 import { PERIOD_OPTIONS } from "../data/statistics.data";
 
+// Hooks
+import useObjectState from "@/shared/hooks/useObjectState";
+
 // Components
+import MskStats from "../components/MskStats";
+import HarvestStats from "../components/HarvestStats";
 import StatsOverview from "../components/StatsOverview";
-import StatsMap from "../components/StatsMap";
 import RequestsStats from "../components/RequestsStats";
 import ServicesStats from "../components/ServicesStats";
-import MskStats from "../components/MskStats";
 import RegionBreakdown from "../components/RegionBreakdown";
-import HarvestStats from "../components/HarvestStats";
+import RegionDistrictPicker from "@/shared/components/ui/RegionDistrictPicker";
+import Card from "@/shared/components/ui/Card";
+import { cn } from "@/shared/utils/cn";
 
 const TABS = [
   { key: "requests", label: "Murojaatlar" },
   { key: "services", label: "Xizmat arizalari" },
-  { key: "msk",      label: "MSK buyurtmalar" },
-  { key: "regions",  label: "Hududlar" },
-  { key: "tomorqa",  label: "Tomorqa" },
+  { key: "msk", label: "MSK buyurtmalar" },
+  { key: "regions", label: "Hududlar" },
+  { key: "tomorqa", label: "Tomorqa" },
 ];
 
-/**
- * StatisticsPage — main analytics page.
- * Holds period + region/district filter state, passes down to all child components.
- *
- * @returns {JSX.Element}
- */
 const StatisticsPage = () => {
   const [activeTab, setActiveTab] = useState("requests");
 
@@ -53,15 +49,7 @@ const StatisticsPage = () => {
     <div className="p-6">
       {/* Header */}
       <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="size-9 bg-blue-50 rounded-xl flex items-center justify-center">
-            <BarChart2 className="size-5 text-blue-600" strokeWidth={1.5} />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">Statistika</h1>
-            <p className="text-xs text-gray-500">Barcha ko'rsatkichlar real vaqtda yangilanib turadi</p>
-          </div>
-        </div>
+        <h1 className="text-2xl font-bold">Statistika</h1>
 
         {/* Period filter */}
         <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1">
@@ -85,36 +73,44 @@ const StatisticsPage = () => {
       <StatsOverview filters={filters} />
 
       {/* Map + select region/district filter */}
-      <StatsMap
-        onRegionChange={handleRegionChange}
-        onDistrictChange={handleDistrictChange}
-      />
+      <div className="grid grid-cols-2 gap-4">
+        {/* Left Col - Map selector */}
+        <div className="relative size-full">
+          <RegionDistrictPicker
+            className="sticky top-4 inset-x-0"
+            onRegionChange={handleRegionChange}
+            onDistrictChange={handleDistrictChange}
+          />
+        </div>
 
-      {/* Module tabs */}
-      <div className="mb-4">
-        <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 w-fit">
-          {TABS.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={
-                activeTab === tab.key
-                  ? "px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 text-white transition-all"
-                  : "px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all"
-              }
-            >
-              {tab.label}
-            </button>
-          ))}
+        {/* Right col - Tab contents */}
+        <div className="relative space-y-4">
+          {/* Module tabs */}
+          <Card className="flex !p-1 sticky top-4 inset-x-0 z-10">
+            {TABS.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={cn(
+                  "grow py-1.5 rounded-xl text-sm transition-colors",
+                  activeTab === tab.key
+                    ? "bg-primary text-white"
+                    : "text-gray-600 hover:text-primary",
+                )}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </Card>
+
+          {/* Tab content */}
+          {activeTab === "requests" && <RequestsStats filters={filters} />}
+          {activeTab === "services" && <ServicesStats filters={filters} />}
+          {activeTab === "msk" && <MskStats filters={filters} />}
+          {activeTab === "regions" && <RegionBreakdown filters={filters} />}
+          {activeTab === "tomorqa" && <HarvestStats filters={filters} />}
         </div>
       </div>
-
-      {/* Tab content */}
-      {activeTab === "requests" && <RequestsStats filters={filters} />}
-      {activeTab === "services" && <ServicesStats filters={filters} />}
-      {activeTab === "msk"      && <MskStats filters={filters} />}
-      {activeTab === "regions"  && <RegionBreakdown filters={filters} />}
-      {activeTab === "tomorqa"  && <HarvestStats filters={filters} />}
     </div>
   );
 };
