@@ -86,7 +86,9 @@ const ResolutionBar = ({ byStatus = [], resolvedKey = "resolved" }) => {
       </div>
 
       {total > 0 && (
-        <p className="text-xs text-gray-400 text-center">Jami: {total} ta murojaat</p>
+        <p className="text-xs text-gray-400 text-center">
+          Jami: {total} ta murojaat
+        </p>
       )}
     </div>
   );
@@ -134,14 +136,19 @@ const RequestsStats = ({ filters }) => {
   }));
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <div className="space-y-4">
       {/* Trend area chart */}
-      <Card title="Kunlik trend">
+      <Card title="Kunlik trend" className="space-y-4">
         {trend.length === 0 ? (
-          <p className="text-sm text-gray-400 text-center py-12">Ma'lumot topilmadi</p>
+          <p className="text-sm text-gray-400 text-center py-12">
+            Ma'lumot topilmadi
+          </p>
         ) : (
           <ResponsiveContainer width="100%" height={210}>
-            <AreaChart data={trend} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+            <AreaChart
+              data={trend}
+              margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
+            >
               <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
               <XAxis
                 dataKey="date"
@@ -150,7 +157,11 @@ const RequestsStats = ({ filters }) => {
               />
               <YAxis tick={{ fontSize: 10, fill: "#9CA3AF" }} />
               <Tooltip
-                contentStyle={{ borderRadius: "12px", border: "1px solid #E5E7EB", fontSize: 12 }}
+                contentStyle={{
+                  borderRadius: "12px",
+                  border: "1px solid #E5E7EB",
+                  fontSize: 12,
+                }}
                 formatter={(v) => [v, "Murojaatlar"]}
                 labelFormatter={(l) => `Sana: ${l}`}
               />
@@ -169,9 +180,11 @@ const RequestsStats = ({ filters }) => {
       </Card>
 
       {/* Status donut chart */}
-      <Card title="Status taqsimoti">
+      <Card title="Status taqsimoti" className="space-y-4">
         {pieData.length === 0 ? (
-          <p className="text-sm text-gray-400 text-center py-12">Ma'lumot topilmadi</p>
+          <p className="text-sm text-gray-400 text-center py-12">
+            Ma'lumot topilmadi
+          </p>
         ) : (
           <ResponsiveContainer width="100%" height={210}>
             <PieChart>
@@ -189,7 +202,11 @@ const RequestsStats = ({ filters }) => {
                 ))}
               </Pie>
               <Tooltip
-                contentStyle={{ borderRadius: "12px", border: "1px solid #E5E7EB", fontSize: 12 }}
+                contentStyle={{
+                  borderRadius: "12px",
+                  border: "1px solid #E5E7EB",
+                  fontSize: 12,
+                }}
                 formatter={(v, n) => [v, n]}
               />
               <Legend
@@ -203,9 +220,11 @@ const RequestsStats = ({ filters }) => {
       </Card>
 
       {/* Category bar chart */}
-      <Card title="Kategoriya bo'yicha">
+      <Card title="Kategoriya bo'yicha" className="space-y-4">
         {categoryData.length === 0 ? (
-          <p className="text-sm text-gray-400 text-center py-12">Ma'lumot topilmadi</p>
+          <p className="text-sm text-gray-400 text-center py-12">
+            Ma'lumot topilmadi
+          </p>
         ) : (
           <ResponsiveContainer width="100%" height={210}>
             <BarChart
@@ -213,7 +232,11 @@ const RequestsStats = ({ filters }) => {
               layout="vertical"
               margin={{ top: 4, right: 16, left: 8, bottom: 0 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" horizontal={false} />
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="#F3F4F6"
+                horizontal={false}
+              />
               <XAxis type="number" tick={{ fontSize: 10, fill: "#9CA3AF" }} />
               <YAxis
                 type="category"
@@ -222,17 +245,26 @@ const RequestsStats = ({ filters }) => {
                 tick={{ fontSize: 11, fill: "#6B7280" }}
               />
               <Tooltip
-                contentStyle={{ borderRadius: "12px", border: "1px solid #E5E7EB", fontSize: 12 }}
+                contentStyle={{
+                  borderRadius: "12px",
+                  border: "1px solid #E5E7EB",
+                  fontSize: 12,
+                }}
                 formatter={(v) => [v, "Soni"]}
               />
-              <Bar dataKey="count" fill={CHART_COLORS.primary} radius={[0, 6, 6, 0]} name="Soni" />
+              <Bar
+                dataKey="count"
+                fill={CHART_COLORS.primary}
+                radius={[0, 6, 6, 0]}
+                name="Soni"
+              />
             </BarChart>
           </ResponsiveContainer>
         )}
       </Card>
 
       {/* Resolution rate */}
-      <Card title="Bajarilish darajasi">
+      <Card title="Bajarilish darajasi" className="space-y-4">
         <ResolutionBar byStatus={byStatus} resolvedKey="resolved" />
       </Card>
     </div>
