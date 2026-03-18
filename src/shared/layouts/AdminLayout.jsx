@@ -33,12 +33,12 @@ import { NavLink, Outlet } from "react-router-dom";
 
 const AdminLayout = () => {
   return (
-    <div className="flex min-h-screen bg-slate-50 relative">
+    <div className="flex min-h-svh bg-slate-50 relative">
       {/* Sidebar */}
       <Sidebar />
 
       {/* Outlet(Main) */}
-      <main className="flex-1 min-h-screen relative z-10">
+      <main className="flex-1 min-h-svh relative z-10">
         <Outlet />
       </main>
 
@@ -84,7 +84,7 @@ const Sidebar = () => {
         </div>
 
         {/* Main (Nav items) */}
-        <nav className="flex-1 p-3 space-y-1">
+        <nav className="flex-1 p-3 w-full overflow-y-auto space-y-1 hidden-scrollbar">
           {navItems.map((item, idx) => {
             if (item.isDivider) {
               return (
