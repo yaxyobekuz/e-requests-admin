@@ -72,6 +72,18 @@ export const KPI_CONFIG = [
   { key: "users",    label: "Faol foydalanuvchilar",  iconColor: "bg-green-50 text-green-600" },
 ];
 
+/** Recharts hex colors for user statuses */
+export const USER_STATUS_COLORS = {
+  active:   "#22C55E",
+  inactive: "#EF4444",
+};
+
+/** User status Uzbek labels */
+export const USER_STATUS_LABELS = {
+  active:   "Faol",
+  inactive: "Nofaol",
+};
+
 /** Shared chart colors for area/bar series */
 export const CHART_COLORS = {
   primary:   "#3B82F6",
@@ -94,3 +106,27 @@ export const HARVEST_SEASON_LABELS = {
   kuz:   "Kuz",
   qish:  "Qish",
 };
+
+/** Harvest season select options */
+export const HARVEST_SEASON_OPTIONS = [
+  { value: "bahor", label: "Bahor" },
+  { value: "yoz",   label: "Yoz" },
+  { value: "kuz",   label: "Kuz" },
+  { value: "qish",  label: "Qish" },
+];
+
+/** Region sort select options */
+export const REGION_SORT_OPTIONS = [
+  { value: "total",    label: "Jami" },
+  { value: "requests", label: "Murojaatlar" },
+  { value: "services", label: "Xizmatlar" },
+  { value: "msk",      label: "MSK" },
+];
+
+/** Region module filter options */
+export const REGION_MODULE_OPTIONS = [
+  { value: "",         label: "Barchasi" },
+  { value: "requests", label: "Murojaatlar" },
+  { value: "services", label: "Xizmat arizalari" },
+  { value: "msk",      label: "MSK buyurtmalar" },
+];
