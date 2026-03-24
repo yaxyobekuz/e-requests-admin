@@ -46,6 +46,29 @@ export const statsAPI = {
     http.get(`/api/stats/by-district/${regionId}`, { params }),
 
   /**
+   * User analytics: trend, byStatus, byRegion, topActive.
+   * @param {{ period?: string, regionId?: string, districtId?: string }} params
+   * @returns {Promise}
+   */
+  getUsers: (params) => http.get("/api/stats/users", { params }),
+
+  /**
+   * All top-level regions with user counts (total, active, inactive).
+   * @param {{ period?: string }} params
+   * @returns {Promise}
+   */
+  getUsersByRegion: (params) => http.get("/api/stats/users/by-region", { params }),
+
+  /**
+   * Districts/neighborhoods within a region with user counts.
+   * @param {string} regionId
+   * @param {{ period?: string, districtId?: string }} params
+   * @returns {Promise}
+   */
+  getUsersByDistrict: (regionId, params) =>
+    http.get(`/api/stats/users/by-district/${regionId}`, { params }),
+
+  /**
    * Hosil statistikasi — mahsulot, nav va hudud bo'yicha o'rtacha kg/sotix.
    * @param {{ productId?: string, varietyId?: string, regionId?: string, year?: number }} params
    * @returns {Promise}
@@ -58,4 +81,13 @@ export const statsAPI = {
    * @returns {Promise}
    */
   getHarvestByRegion: (params) => http.get("/api/harvest/stats/by-region", { params }),
+
+  /**
+   * Hosil statistikasi tanlangan viloyat tumanlari bo'yicha.
+   * @param {string} regionId - viloyat ID
+   * @param {{ productId?: string, varietyId?: string, year?: number, season?: string }} params
+   * @returns {Promise}
+   */
+  getHarvestByDistrict: (regionId, params) =>
+    http.get(`/api/harvest/stats/by-district/${regionId}`, { params }),
 };
