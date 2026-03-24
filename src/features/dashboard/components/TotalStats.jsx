@@ -8,12 +8,6 @@ import { statsAPI } from "@/features/statistics/api";
 // Components
 import KpiCard from "./KpiCard";
 
-/**
- * Animated counter from 0 → target using requestAnimationFrame (ease-out quad).
- *
- * @param {{ target: number }} props
- * @returns {JSX.Element}
- */
 const AnimatedNumber = ({ target }) => {
   const [display, setDisplay] = useState(0);
   const rafRef = useRef(null);
@@ -38,11 +32,6 @@ const AnimatedNumber = ({ target }) => {
   return <span>{display.toLocaleString("uz-UZ")}</span>;
 };
 
-/**
- * TotalStats — 4 animated KPI cards with real data from /api/stats/overview.
- *
- * @returns {JSX.Element}
- */
 const TotalStats = () => {
   const { data, isLoading } = useQuery({
     queryKey: ["stats", "overview", { period: "30" }],
@@ -52,7 +41,7 @@ const TotalStats = () => {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-4 gap-4 mb-4">
+      <div className="grid grid-cols-4 gap-4">
         {["bg-green-50", "bg-blue-50", "bg-yellow-50", "bg-pink-50"].map((bg, i) => (
           <div key={i} className="bg-white p-4 rounded-2xl flex items-center gap-4">
             <div className={`size-10 rounded-lg ${bg} animate-pulse flex-shrink-0`} />
@@ -69,7 +58,7 @@ const TotalStats = () => {
   const total = (data?.requests ?? 0) + (data?.services ?? 0) + (data?.msk ?? 0);
 
   return (
-    <div className="grid grid-cols-4 gap-4 mb-4">
+    <div className="grid grid-cols-4 gap-4">
       <KpiCard
         label="Umumiy arizalar soni"
         value={<AnimatedNumber target={total} />}

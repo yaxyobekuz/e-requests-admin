@@ -42,7 +42,7 @@ const UserStats = () => {
 
   if (isLoading) {
     return (
-      <div className="mb-4 space-y-4">
+      <div className="space-y-4">
         <div className="grid grid-cols-4 gap-4">
           {["bg-purple-50", "bg-green-50", "bg-blue-50", "bg-red-50"].map(
             (bg, i) => (
@@ -78,7 +78,7 @@ const UserStats = () => {
     .slice(0, 3);
 
   return (
-    <div className="mb-4 space-y-4">
+    <div className="space-y-4">
       {/* KPI cards */}
       <div className="grid grid-cols-4 gap-4">
         <KpiCard

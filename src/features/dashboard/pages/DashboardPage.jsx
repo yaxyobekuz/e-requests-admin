@@ -7,7 +7,7 @@ import TotalStats from "../components/TotalStats";
 
 const DashboardPage = () => {
   return (
-    <div className="p-6">
+    <div className="p-6 space-y-4">
       {/* Greeting */}
       <TopPanel />
 

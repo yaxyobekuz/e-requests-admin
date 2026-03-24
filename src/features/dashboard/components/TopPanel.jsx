@@ -35,7 +35,7 @@ const TopPanel = () => {
   const seconds = String(now.getSeconds()).padStart(2, "0");
 
   return (
-    <div className="flex items-center justify-between mb-4">
+    <div className="flex items-center justify-between">
       {/* Left side */}
       <div className="space-y-2">
         <h1 className="text-2xl font-bold text-gray-900">
