@@ -17,6 +17,9 @@ import { useState } from "react";
 import { statsAPI } from "../api";
 import { productsAPI } from "@/shared/api";
 
+// Data
+import { HARVEST_SEASON_OPTIONS } from "../data/statistics.data";
+
 // Components
 import Card from "@/shared/components/ui/Card";
 
@@ -56,7 +59,9 @@ const HarvestTooltip = ({ active, payload, label }) => {
 
 const HarvestStats = ({ filters }) => {
   const [selectedProductId, setSelectedProductId] = useState("");
+  const [selectedVarietyId, setSelectedVarietyId] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
+  const [selectedSeason, setSelectedSeason] = useState("");
 
   const { data: products = [] } = useQuery({
     queryKey: ["products"],
@@ -64,9 +69,20 @@ const HarvestStats = ({ filters }) => {
     staleTime: 10 * 60 * 1000,
   });
 
+  // Get varieties of selected product
+  const selectedProduct = products.find((p) => p._id === selectedProductId);
+  const varieties = selectedProduct?.varieties || [];
+
+  const handleProductChange = (e) => {
+    setSelectedProductId(e.target.value);
+    setSelectedVarietyId("");
+  };
+
   const harvestParams = {
     ...(selectedProductId && { productId: selectedProductId }),
+    ...(selectedVarietyId && { varietyId: selectedVarietyId }),
     ...(selectedYear && { year: Number(selectedYear) }),
+    ...(selectedSeason && { season: selectedSeason }),
     ...(filters.regionId && { regionId: filters.regionId }),
   };
 
@@ -81,6 +97,16 @@ const HarvestStats = ({ filters }) => {
     queryKey: ["stats", "harvest", "by-region", harvestParams],
     queryFn: () =>
       statsAPI.getHarvestByRegion(harvestParams).then((r) => r.data),
+    refetchInterval: 60_000,
+  });
+
+  const { data: byDistrict = [], isLoading: districtLoading } = useQuery({
+    queryKey: ["stats", "harvest", "by-district", filters.regionId, harvestParams],
+    queryFn: () =>
+      statsAPI
+        .getHarvestByDistrict(filters.regionId, harvestParams)
+        .then((r) => r.data),
+    enabled: !!filters.regionId,
     refetchInterval: 60_000,
   });
 
@@ -108,13 +134,47 @@ const HarvestStats = ({ filters }) => {
     }, [])
     .sort((a, b) => b.avgPerSotix - a.avgPerSotix);
 
+  /**
+   * Renders a horizontal progress-bar breakdown for region/district data.
+   * @param {Array} data - array of { regionName|districtName, avgPerSotix, count }
+   * @param {string} nameKey - key for the name field (regionName or districtName)
+   * @returns {JSX.Element}
+   */
+  const renderBarBreakdown = (data, nameKey) => (
+    <div className="space-y-2">
+      {data.map((r, i) => {
+        const maxAvg = data[0]?.avgPerSotix || 1;
+        const pct = Math.round((r.avgPerSotix / maxAvg) * 100);
+        return (
+          <div key={i} className="flex items-center gap-3">
+            <span className="w-32 text-sm text-gray-700 truncate flex-shrink-0">
+              {r[nameKey] || "Noma'lum"}
+            </span>
+            <div className="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-lime-400 to-green-600"
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+            <span className="text-sm font-semibold text-gray-700 w-20 text-right flex-shrink-0">
+              {r.avgPerSotix} kg/sotix
+            </span>
+            <span className="text-xs text-gray-400 w-12 text-right flex-shrink-0">
+              {r.count} ta
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+
   return (
     <div className="space-y-4">
       {/* Filters row */}
       <div className="flex gap-4">
         <select
           value={selectedProductId}
-          onChange={(e) => setSelectedProductId(e.target.value)}
+          onChange={handleProductChange}
           className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-500"
         >
           <option value="">Barcha mahsulotlar</option>
@@ -125,6 +185,21 @@ const HarvestStats = ({ filters }) => {
           ))}
         </select>
 
+        {selectedProductId && varieties.length > 0 && (
+          <select
+            value={selectedVarietyId}
+            onChange={(e) => setSelectedVarietyId(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-500"
+          >
+            <option value="">Barcha navlar</option>
+            {varieties.map((v) => (
+              <option key={v._id} value={v._id}>
+                {v.name}
+              </option>
+            ))}
+          </select>
+        )}
+
         <select
           value={selectedYear}
           onChange={(e) => setSelectedYear(e.target.value)}
@@ -134,6 +209,19 @@ const HarvestStats = ({ filters }) => {
           {yearOptions.map((y) => (
             <option key={y} value={y}>
               {y}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={selectedSeason}
+          onChange={(e) => setSelectedSeason(e.target.value)}
+          className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-500"
+        >
+          <option value="">Barcha fasllar</option>
+          {HARVEST_SEASON_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
             </option>
           ))}
         </select>
@@ -271,33 +359,24 @@ const HarvestStats = ({ filters }) => {
             Ma'lumot topilmadi
           </p>
         ) : (
-          <div className="space-y-2">
-            {byRegion.map((r, i) => {
-              const maxAvg = byRegion[0]?.avgPerSotix || 1;
-              const pct = Math.round((r.avgPerSotix / maxAvg) * 100);
-              return (
-                <div key={i} className="flex items-center gap-3">
-                  <span className="w-32 text-sm text-gray-700 truncate flex-shrink-0">
-                    {r.regionName || "Noma'lum"}
-                  </span>
-                  <div className="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-lime-400 to-green-600"
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                  <span className="text-sm font-semibold text-gray-700 w-20 text-right flex-shrink-0">
-                    {r.avgPerSotix} kg/sotix
-                  </span>
-                  <span className="text-xs text-gray-400 w-12 text-right flex-shrink-0">
-                    {r.count} ta
-                  </span>
-                </div>
-              );
-            })}
-          </div>
+          renderBarBreakdown(byRegion, "regionName")
         )}
       </Card>
+
+      {/* By district (appears when a region is selected on the map) */}
+      {filters.regionId && (
+        <Card title="Tumanlar bo'yicha hosil" className="space-y-4">
+          {districtLoading ? (
+            <div className="h-48 bg-gray-100 rounded-xl animate-pulse" />
+          ) : byDistrict.length === 0 ? (
+            <p className="text-sm text-gray-400 text-center py-12">
+              Tuman ma'lumotlari topilmadi
+            </p>
+          ) : (
+            renderBarBreakdown(byDistrict, "districtName")
+          )}
+        </Card>
+      )}
     </div>
   );
 };
