@@ -26,6 +26,7 @@ const initialState = {
   editProduct: initialModalData,
   addVariety: initialModalData,
   editVariety: initialModalData,
+  bugReport: initialModalData,
 };
 
 export const modalSlice = createSlice({

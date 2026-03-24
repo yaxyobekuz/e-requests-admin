@@ -31,6 +31,9 @@ import { useQuery } from "@tanstack/react-query";
 // Router
 import { NavLink, Outlet } from "react-router-dom";
 
+// Components
+import BugReport from "../components/layout/BugReport";
+
 const AdminLayout = () => {
   return (
     <div className="flex min-h-svh bg-slate-50 relative">
@@ -44,6 +47,8 @@ const AdminLayout = () => {
 
       {/* Background Patterns */}
       <BackgroundPatterns />
+
+      <BugReport />
     </div>
   );
 };
