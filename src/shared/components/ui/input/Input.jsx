@@ -4,7 +4,7 @@ import * as React from "react";
 import { cn } from "@/shared/utils/cn.js";
 
 export const inputBaseClasses =
-  "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base outline-2 outline-primary disabled:cursor-not-allowed disabled:opacity-50 md:text-sm";
+  "flex h-10 w-full rounded-md border border-input bg-white px-3 py-2 text-base outline-2 outline-primary disabled:cursor-not-allowed disabled:opacity-50 md:text-sm";
 
 /**
  * Reusable styled input component with consistent styling across the application.
@@ -15,6 +15,16 @@ export const inputBaseClasses =
  * @returns {JSX.Element} Styled input element
  */
 const Input = ({ className, type = "text", ...props }, ref) => {
+  if (type === "textarea") {
+    return (
+      <textarea
+        ref={ref}
+        {...props}
+        className={cn(inputBaseClasses, "h-auto min-h-40 max-h-96", className)}
+      />
+    );
+  }
+
   return (
     <input
       ref={ref}
