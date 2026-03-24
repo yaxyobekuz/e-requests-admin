@@ -14,6 +14,8 @@ import StatsOverview from "../components/StatsOverview";
 import RequestsStats from "../components/RequestsStats";
 import ServicesStats from "../components/ServicesStats";
 import RegionBreakdown from "../components/RegionBreakdown";
+import UsersStats from "../components/UsersStats";
+import UsersRegionBreakdown from "../components/UsersRegionBreakdown";
 import RegionDistrictPicker from "@/shared/components/ui/RegionDistrictPicker";
 import Card from "@/shared/components/ui/Card";
 import { cn } from "@/shared/utils/cn";
@@ -22,6 +24,7 @@ const TABS = [
   { key: "requests", label: "Murojaatlar" },
   { key: "services", label: "Xizmat arizalari" },
   { key: "msk", label: "MSK buyurtmalar" },
+  { key: "users", label: "Foydalanuvchilar" },
   { key: "regions", label: "Hududlar" },
   { key: "tomorqa", label: "Tomorqa" },
 ];
@@ -107,6 +110,12 @@ const StatisticsPage = () => {
           {activeTab === "requests" && <RequestsStats filters={filters} />}
           {activeTab === "services" && <ServicesStats filters={filters} />}
           {activeTab === "msk" && <MskStats filters={filters} />}
+          {activeTab === "users" && (
+            <>
+              <UsersStats filters={filters} />
+              <UsersRegionBreakdown filters={filters} />
+            </>
+          )}
           {activeTab === "regions" && <RegionBreakdown filters={filters} />}
           {activeTab === "tomorqa" && <HarvestStats filters={filters} />}
         </div>
