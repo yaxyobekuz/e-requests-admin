@@ -1,5 +1,6 @@
 // Components
 import TopPanel from "../components/TopPanel";
+import UserStats from "../components/UserStats";
 import StatsByMap from "../components/StatsByMap";
 import AdminStats from "../components/AdminStats";
 import TotalStats from "../components/TotalStats";
@@ -18,6 +19,9 @@ const DashboardPage = () => {
 
       {/* Admin stats */}
       <AdminStats />
+
+      {/* User stats */}
+      <UserStats />
     </div>
   );
 };
