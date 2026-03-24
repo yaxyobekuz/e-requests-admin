@@ -117,7 +117,7 @@ export const HARVEST_SEASON_OPTIONS = [
 
 /** Region sort select options */
 export const REGION_SORT_OPTIONS = [
-  { value: "total",    label: "Jami" },
+  { value: "total",    label: "Barchasi" },
   { value: "requests", label: "Murojaatlar" },
   { value: "services", label: "Xizmatlar" },
   { value: "msk",      label: "MSK" },
