@@ -32,20 +32,25 @@ const TABS = [
 const StatisticsPage = () => {
   const [activeTab, setActiveTab] = useState("requests");
 
-  const { period, regionId, districtId, setFields, setField } = useObjectState({
+  const { period, regionId, districtId, neighborhoodId, setFields, setField } = useObjectState({
     period: "30",
     regionId: null,
     districtId: null,
+    neighborhoodId: null,
   });
 
-  const filters = { period, regionId, districtId };
+  const filters = { period, regionId, districtId, neighborhoodId };
 
   const handleRegionChange = (id, _label) => {
-    setFields({ regionId: id || null, districtId: null });
+    setFields({ regionId: id || null, districtId: null, neighborhoodId: null });
   };
 
   const handleDistrictChange = (id) => {
-    setField("districtId", id || null);
+    setFields({ districtId: id || null, neighborhoodId: null });
+  };
+
+  const handleNeighborhoodChange = (id) => {
+    setField("neighborhoodId", id || null);
   };
 
   return (
@@ -83,6 +88,7 @@ const StatisticsPage = () => {
             className="sticky top-4 inset-x-0"
             onRegionChange={handleRegionChange}
             onDistrictChange={handleDistrictChange}
+            onNeighborhoodChange={handleNeighborhoodChange}
           />
         </div>
 
