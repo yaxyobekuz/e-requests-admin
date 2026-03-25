@@ -1,7 +1,9 @@
+import BaliqchiMap from "../districts/BaliqchiMap";
+
 /** @type {{ label: string }[]} */
 const andijanDistricts = [
+  { label: "Baliqchi tumani", component: BaliqchiMap },
   { label: "Ulug'nor tumani" },
-  { label: "Baliqchi tumani" },
   { label: "Bo'ston tumani" },
   { label: "Shahrixon tumani" },
   { label: "Izboskan tumani" },
