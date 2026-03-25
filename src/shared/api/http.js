@@ -19,6 +19,12 @@ http.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    // Strip null/undefined params so they don't reach the server as the string "null"
+    if (config.params) {
+      config.params = Object.fromEntries(
+        Object.entries(config.params).filter(([, v]) => v != null),
+      );
+    }
     return config;
   },
   (error) => {

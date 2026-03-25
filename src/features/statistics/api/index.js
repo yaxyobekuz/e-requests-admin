@@ -3,28 +3,28 @@ import http from "@/shared/api/http";
 export const statsAPI = {
   /**
    * Global KPI counts: requests, service reports, MSK orders, active users.
-   * @param {{ period?: string, regionId?: string, districtId?: string }} params
+   * @param {{ period?: string, regionId?: string, districtId?: string, neighborhoodId?: string }} params
    * @returns {Promise}
    */
   getOverview: (params) => http.get("/api/stats/overview", { params }),
 
   /**
    * Request analytics: byStatus, byCategory, trend, topRegions.
-   * @param {{ period?: string, regionId?: string, districtId?: string }} params
+   * @param {{ period?: string, regionId?: string, districtId?: string, neighborhoodId?: string }} params
    * @returns {Promise}
    */
   getRequests: (params) => http.get("/api/stats/requests", { params }),
 
   /**
    * Service report analytics: byStatus, byService, trend, topRegions.
-   * @param {{ period?: string, regionId?: string, districtId?: string }} params
+   * @param {{ period?: string, regionId?: string, districtId?: string, neighborhoodId?: string }} params
    * @returns {Promise}
    */
   getServices: (params) => http.get("/api/stats/services", { params }),
 
   /**
    * MSK order analytics: byStatus, byCategory, trend, topRegions.
-   * @param {{ period?: string, regionId?: string, districtId?: string }} params
+   * @param {{ period?: string, regionId?: string, districtId?: string, neighborhoodId?: string }} params
    * @returns {Promise}
    */
   getMsk: (params) => http.get("/api/stats/msk", { params }),
@@ -39,11 +39,20 @@ export const statsAPI = {
   /**
    * Districts of a region with counts across all 3 modules.
    * @param {string} regionId
-   * @param {{ period?: string }} params
+   * @param {{ period?: string, neighborhoodId?: string }} params
    * @returns {Promise}
    */
   getByDistrict: (regionId, params) =>
     http.get(`/api/stats/by-district/${regionId}`, { params }),
+
+  /**
+   * Neighborhoods of a district with counts across all 3 modules.
+   * @param {string} districtId
+   * @param {{ period?: string }} params
+   * @returns {Promise}
+   */
+  getByNeighborhood: (districtId, params) =>
+    http.get(`/api/stats/by-neighborhood/${districtId}`, { params }),
 
   /**
    * User analytics: trend, byStatus, byRegion, topActive.
