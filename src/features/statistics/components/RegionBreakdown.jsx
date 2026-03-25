@@ -83,6 +83,14 @@ const RegionBreakdown = ({ filters }) => {
     refetchInterval: 60_000,
   });
 
+  const { data: neighborhoods = [], isLoading: neighborhoodsLoading } = useQuery({
+    queryKey: ["stats", "by-neighborhood", filters.districtId, filters],
+    queryFn: () =>
+      statsAPI.getByNeighborhood(filters.districtId, filters).then((r) => r.data),
+    enabled: !!filters.districtId,
+    refetchInterval: 60_000,
+  });
+
   const buildChartData = (data, sort) =>
     [...data]
       .sort((a, b) => b[sort] - a[sort])
@@ -95,6 +103,7 @@ const RegionBreakdown = ({ filters }) => {
 
   const chartData = buildChartData(regions, sortBy);
   const districtChartData = buildChartData(districts, sortBy);
+  const neighborhoodChartData = buildChartData(neighborhoods, sortBy);
 
   const moduleKeys = moduleFilter
     ? [
@@ -294,6 +303,29 @@ const RegionBreakdown = ({ filters }) => {
           {!districtsLoading && districtChartData.length > 0 && (
             <Card title="Tumanlar jadvali" className="space-y-4">
               {renderTable(districtChartData, "Tuman")}
+            </Card>
+          )}
+        </>
+      )}
+
+      {/* Neighborhood breakdown (appears when a district is selected) */}
+      {filters.districtId && (
+        <>
+          <Card title="Mahallalar bo'yicha taqqoslama" className="space-y-4">
+            {neighborhoodsLoading ? (
+              <div className="h-64 bg-gray-100 rounded-xl animate-pulse" />
+            ) : neighborhoodChartData.length === 0 ? (
+              <p className="text-sm text-gray-400 text-center py-12">
+                Mahalla ma'lumotlari topilmadi
+              </p>
+            ) : (
+              renderChart(neighborhoodChartData, moduleKeys)
+            )}
+          </Card>
+
+          {!neighborhoodsLoading && neighborhoodChartData.length > 0 && (
+            <Card title="Mahallalar jadvali" className="space-y-4">
+              {renderTable(neighborhoodChartData, "Mahalla")}
             </Card>
           )}
         </>
