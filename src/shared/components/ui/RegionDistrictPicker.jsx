@@ -1,19 +1,21 @@
-// Data
-import uzbekistanRegions, {
-  getRegionByLabel,
-} from "./map/data/uzbekistan.data";
-
 // Utils
 import { cn } from "@/shared/utils/cn";
 
 // Icons
 import { ArrowLeft } from "lucide-react";
 
-// APIs
+// API
 import { regionsAPI } from "@/shared/api";
 
 // Tanstack Query
 import { useQuery } from "@tanstack/react-query";
+
+// Data
+import uzbekistanRegions, {
+  getRegionByLabel,
+  getDistrictByLabel,
+} from "./map/data/uzbekistan.data";
+import andijanDistricts from "./map/data/andijan.data";
 
 // Hooks
 import useObjectState from "@/shared/hooks/useObjectState";
@@ -28,18 +30,23 @@ const RegionDistrictPicker = ({
   className,
   onRegionChange,
   onDistrictChange,
+  onNeighborhoodChange,
 }) => {
   const {
     selectedRegion,
     selectedRegionId,
     selectedDistrict,
     selectedDistrictId,
+    selectedNeighborhood,
+    selectedNeighborhoodId,
     setFields,
   } = useObjectState({
     selectedRegion: null,
     selectedRegionId: null,
     selectedDistrict: null,
     selectedDistrictId: null,
+    selectedNeighborhood: null,
+    selectedNeighborhoodId: null,
   });
 
   const { data: regionsList = [] } = useQuery({
@@ -56,9 +63,23 @@ const RegionDistrictPicker = ({
     enabled: !!selectedRegionId,
   });
 
+  const { data: neighborhoodsList = [] } = useQuery({
+    queryKey: ["regions", "list", "neighborhood", selectedDistrictId],
+    queryFn: () =>
+      regionsAPI
+        .getAll({ type: "neighborhood", parent: selectedDistrictId })
+        .then((r) => r.data),
+    enabled: !!selectedDistrictId,
+  });
+
   const RegionMapComponent =
     getRegionByLabel(selectedRegion)?.component ||
     uzbekistanRegions[0].component;
+
+  // Sub-map for the selected district
+  const districtEntry = getDistrictByLabel(selectedRegion, selectedDistrict);
+  const DistrictMapComponent =
+    districtEntry?.component || andijanDistricts[0].component;
 
   const selectRegion = (regionId, regionName) => {
     setFields({
@@ -66,17 +87,31 @@ const RegionDistrictPicker = ({
       selectedRegionId: regionId,
       selectedDistrict: null,
       selectedDistrictId: null,
+      selectedNeighborhood: null,
+      selectedNeighborhoodId: null,
     });
     onRegionChange?.(regionId, regionName);
     onDistrictChange?.(null, null);
+    onNeighborhoodChange?.(null, null);
   };
 
   const selectDistrict = (districtId, districtName) => {
     setFields({
       selectedDistrict: districtName,
       selectedDistrictId: districtId,
+      selectedNeighborhood: null,
+      selectedNeighborhoodId: null,
     });
     onDistrictChange?.(districtId, districtName);
+    onNeighborhoodChange?.(null, null);
+  };
+
+  const selectNeighborhood = (neighborhoodId, neighborhoodName) => {
+    setFields({
+      selectedNeighborhood: neighborhoodName,
+      selectedNeighborhoodId: neighborhoodId,
+    });
+    onNeighborhoodChange?.(neighborhoodId, neighborhoodName);
   };
 
   const handleMapRegionClick = (label) => {
@@ -93,6 +128,13 @@ const RegionDistrictPicker = ({
     selectDistrict(district?._id || null, label);
   };
 
+  const handleMapNeighborhoodClick = (label) => {
+    const neighborhood = neighborhoodsList.find(
+      (n) => n.name.trim().toLowerCase() === label?.trim().toLowerCase(),
+    );
+    selectNeighborhood(neighborhood?._id || null, label);
+  };
+
   const handleSelectRegion = (regionId) => {
     const region = regionsList.find((r) => r._id === regionId);
     if (!region) return;
@@ -105,17 +147,43 @@ const RegionDistrictPicker = ({
     selectDistrict(district._id, district.name);
   };
 
+  const handleSelectNeighborhood = (neighborhoodId) => {
+    const neighborhood = neighborhoodsList.find(
+      (n) => n._id === neighborhoodId,
+    );
+    if (!neighborhood) return;
+    selectNeighborhood(neighborhood._id, neighborhood.name);
+  };
+
   const handleBackToUzbekistan = () => {
     setFields({
       selectedRegion: null,
       selectedRegionId: null,
       selectedDistrict: null,
       selectedDistrictId: null,
+      selectedNeighborhood: null,
+      selectedNeighborhoodId: null,
     });
 
     onRegionChange?.(null, null);
     onDistrictChange?.(null, null);
+    onNeighborhoodChange?.(null, null);
   };
+
+  // Go back from neighborhood sub-map to district-level map
+  const handleBackToDistricts = () => {
+    setFields({
+      selectedDistrict: null,
+      selectedDistrictId: null,
+      selectedNeighborhood: null,
+      selectedNeighborhoodId: null,
+    });
+    onDistrictChange?.(null, null);
+    onNeighborhoodChange?.(null, null);
+  };
+
+  // Whether the district sub-map is currently visible
+  const isDistrictMapVisible = !!(selectedDistrict && DistrictMapComponent);
 
   return (
     <div className={className}>
@@ -145,6 +213,19 @@ const RegionDistrictPicker = ({
             label: district.name,
           }))}
         />
+
+        <Select
+          className="flex-1"
+          disabled={!selectedDistrictId}
+          placeholder="Mahallani tanlang"
+          onChange={handleSelectNeighborhood}
+          value={selectedNeighborhoodId || ""}
+          triggerClassName="rounded-2xl border-none"
+          options={neighborhoodsList.map((n) => ({
+            value: n._id,
+            label: n.name,
+          }))}
+        />
       </div>
 
       <Card className="relative">
@@ -164,7 +245,7 @@ const RegionDistrictPicker = ({
         <div
           className={cn(
             "absolute inset-0 w-full h-auto aspect-square origin-top transition-all duration-500",
-            selectedRegion
+            selectedRegion && !isDistrictMapVisible
               ? "scale-100 "
               : "scale-0 opacity-0 pointer-events-none",
           )}
@@ -176,14 +257,38 @@ const RegionDistrictPicker = ({
           />
         </div>
 
-        {/* Back to Uzbekistan button */}
+        {/* District sub-map (neighborhood-level) — only when district has a component */}
+        {DistrictMapComponent && (
+          <div
+            className={cn(
+              "absolute inset-0 w-full h-auto aspect-square origin-bottom transition-all duration-500",
+              isDistrictMapVisible
+                ? "scale-100"
+                : "scale-0 opacity-0 pointer-events-none",
+            )}
+          >
+            <DistrictMapComponent
+              value={selectedNeighborhood}
+              onChange={handleMapNeighborhoodClick}
+              className="w-full h-auto aspect-square"
+            />
+          </div>
+        )}
+
+        {/* Back button */}
         {selectedRegion && (
           <Button
-            onClick={handleBackToUzbekistan}
+            onClick={
+              isDistrictMapVisible
+                ? handleBackToDistricts
+                : handleBackToUzbekistan
+            }
             className="absolute top-5 left-5 animate__animated animate__fadeIn"
           >
             <ArrowLeft strokeWidth={1.5} />
-            O'zbekiston xaritasiga qaytish
+            {isDistrictMapVisible
+              ? `${selectedRegion?.split(" ")[0]} xaritasiga qaytish`
+              : "O'zbekiston xaritasiga qaytish"}
           </Button>
         )}
       </Card>
