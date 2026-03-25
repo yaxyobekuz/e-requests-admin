@@ -33,16 +33,21 @@ import RegionDistrictPicker from "@/shared/components/ui/RegionDistrictPicker";
 
 const StatsByMap = () => {
   const {
+    state,
+    setFields,
     selectedRegion,
     selectedRegionId,
     selectedDistrict,
     selectedDistrictId,
-    setFields,
+    selectedNeighborhood,
+    selectedNeighborhoodId,
   } = useObjectState({
     selectedRegion: null,
     selectedRegionId: null,
     selectedDistrict: null,
     selectedDistrictId: null,
+    selectedNeighborhood: null,
+    selectedNeighborhoodId: null,
   });
 
   const { data: overview, isLoading: overviewLoading } = useQuery({
@@ -52,6 +57,7 @@ const StatsByMap = () => {
       {
         regionId: selectedRegionId,
         districtId: selectedDistrictId,
+        neighborhoodId: selectedNeighborhoodId,
         period: "30",
       },
     ],
@@ -61,6 +67,7 @@ const StatsByMap = () => {
           period: "30",
           regionId: selectedRegionId,
           districtId: selectedDistrictId || undefined,
+          neighborhoodId: selectedNeighborhoodId || undefined,
         })
         .then((r) => r.data),
     enabled: !!selectedRegionId,
@@ -74,6 +81,7 @@ const StatsByMap = () => {
       {
         regionId: selectedRegionId,
         districtId: selectedDistrictId,
+        neighborhoodId: selectedNeighborhoodId,
         period: "30",
       },
     ],
@@ -83,6 +91,7 @@ const StatsByMap = () => {
           period: "30",
           regionId: selectedRegionId,
           districtId: selectedDistrictId || undefined,
+          neighborhoodId: selectedNeighborhoodId || undefined,
         })
         .then((r) => r.data),
     enabled: !!selectedRegionId,
@@ -95,6 +104,8 @@ const StatsByMap = () => {
       selectedRegionId: regionId,
       selectedDistrict: null,
       selectedDistrictId: null,
+      selectedNeighborhood: null,
+      selectedNeighborhoodId: null,
     });
   };
 
@@ -102,6 +113,15 @@ const StatsByMap = () => {
     setFields({
       selectedDistrict: districtName,
       selectedDistrictId: districtId,
+      selectedNeighborhood: null,
+      selectedNeighborhoodId: null,
+    });
+  };
+
+  const handleNeighborhoodChange = (neighborhoodId, neighborhoodName) => {
+    setFields({
+      selectedNeighborhood: neighborhoodName,
+      selectedNeighborhoodId: neighborhoodId,
     });
   };
 
@@ -111,6 +131,7 @@ const StatsByMap = () => {
       <RegionDistrictPicker
         onRegionChange={handleRegionChange}
         onDistrictChange={handleDistrictChange}
+        onNeighborhoodChange={handleNeighborhoodChange}
       />
 
       {/* Right col: stats panel */}
@@ -124,6 +145,7 @@ const StatsByMap = () => {
             reqLoading={reqLoading}
             regionName={selectedRegion}
             districtName={selectedDistrict}
+            neighborhoodName={selectedNeighborhood}
             overviewLoading={overviewLoading}
           />
         )}
@@ -138,6 +160,7 @@ const StatsPanel = ({
   regionName,
   reqLoading,
   districtName,
+  neighborhoodName,
   overviewLoading,
 }) => {
   const byStatus = reqStats?.byStatus || [];
@@ -157,7 +180,11 @@ const StatsPanel = ({
       <Card className="flex items-center gap-2.5 h-10 !py-0 !px-3.5">
         <MapPin className="size-4 text-blue-600" strokeWidth={1.5} />
         <p className="font-semibold text-gray-900 leading-tight">
-          {districtName ? `${regionName} - ${districtName}` : regionName}
+          {neighborhoodName
+            ? `${regionName} - ${districtName} - ${neighborhoodName}`
+            : districtName
+              ? `${regionName} - ${districtName}`
+              : regionName}
         </p>
       </Card>
 
