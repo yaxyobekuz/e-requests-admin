@@ -12,14 +12,12 @@ import Button from "@/shared/components/ui/button/Button";
 import CreateRegionForm from "./CreateRegionForm";
 import EditRegionForm from "./EditRegionForm";
 
-/**
- * @param {Object} props
- * @param {string} props.type - region | district | neighborhood | street
- * @param {string} [props.parentId] - parent region ID from route params
- * @param {function} [props.getChildRoute] - (item) => child route path
- * @param {{label: string, href?: string}[]} [props.breadcrumbs] - breadcrumb items
- */
-const RegionListPage = ({ type, parentId, getChildRoute, breadcrumbs = [] }) => {
+const RegionListPage = ({
+  type,
+  parentId,
+  getChildRoute,
+  breadcrumbs = [],
+}) => {
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -53,19 +51,19 @@ const RegionListPage = ({ type, parentId, getChildRoute, breadcrumbs = [] }) => 
 
   return (
     <div className="p-6">
-
-
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">
-          {REGION_TYPES[type]?.plural || "Hududlar"}
+          {REGION_TYPES[type]?.plural || "Hududlar"}{" "}
+          <span className="opacity-70">({items?.length || 0})</span>
         </h1>
+
         <Button
           onClick={() =>
             dispatch(
               open({
                 modal: "createRegion",
                 data: { type, parentId },
-              })
+              }),
             )
           }
           className="flex items-center gap-2"
@@ -75,7 +73,7 @@ const RegionListPage = ({ type, parentId, getChildRoute, breadcrumbs = [] }) => 
         </Button>
       </div>
 
-            {showBreadcrumbs && (
+      {showBreadcrumbs && (
         <div className="mb-4">
           <Breadcrumb items={allBreadcrumbs} />
         </div>
@@ -156,4 +154,3 @@ const RegionListPage = ({ type, parentId, getChildRoute, breadcrumbs = [] }) => 
 };
 
 export default RegionListPage;
-
