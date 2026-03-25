@@ -1,10 +1,15 @@
 import http from "@/shared/api/http";
 
 export const usersAPI = {
-  getAll: (params) => http.get("/api/users", { params }),
-  getById: (id) => http.get(`/api/users/${id}`),
-  create: (data) => http.post("/api/users", data),
-  update: (id, data) => http.put(`/api/users/${id}`, data),
-  delete: (id) => http.delete(`/api/users/${id}`),
-  resetPassword: (id, data) => http.put(`/api/users/${id}/reset-password`, data),
+  /**
+   * Foydalanuvchilar ro'yxati (paginated).
+   * @param {object} params - { regionId, districtId, neighborhoodId, houseType, isActive, page, limit }
+   */
+  getAll: (params) => http.get("/api/admin/users", { params }),
+
+  /**
+   * Foydalanuvchilar statistikasi (jami, faol/nofaol, uy turi, viloyat).
+   * @param {object} params - { regionId, districtId, neighborhoodId }
+   */
+  getStats: (params) => http.get("/api/admin/users/stats", { params }),
 };
