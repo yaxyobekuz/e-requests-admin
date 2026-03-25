@@ -9,6 +9,7 @@ import {
   Settings,
   Briefcase,
   UserCircle,
+  UserRound,
   FolderKanban,
   AlertTriangle,
   LayoutDashboard,
@@ -57,6 +58,7 @@ const Sidebar = () => {
   const navItems = [
     { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/statistics", label: "Statistika", icon: BarChart2 },
+    { to: "/users", label: "Foydalanuvchilar", icon: UserRound },
     { isDivider: true },
     { to: "/requests", label: "Murojaatlar", icon: FileText },
     { to: "/service-reports", label: "Xizmat arizalari", icon: AlertTriangle },
