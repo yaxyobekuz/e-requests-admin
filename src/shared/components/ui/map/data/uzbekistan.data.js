@@ -1,3 +1,4 @@
+// Components
 import NavoiMap from "../NavoiMap";
 import AndijanMap from "../AndijanMap";
 import BukharaMap from "../BukharaMap";
@@ -13,22 +14,93 @@ import TashkentCityMap from "../TashkentCityMap";
 import SurkhandaryaMap from "../SurkhandaryaMap";
 import KarakalpakstanMap from "../KarakalpakstanMap";
 
-/** @type {{ label: string }[]} */
+// Data
+import navoiDistricts from "./navoi.data";
+import andijanDistricts from "./andijan.data";
+import bukharaDistricts from "./bukhara.data";
+import ferganaDistricts from "./fergana.data";
+import jizzakhDistricts from "./jizzakh.data";
+import khorezmDistricts from "./khorezm.data";
+import syrdaryaDistricts from "./syrdarya.data";
+import namanganDistricts from "./namangan.data";
+import tashkentDistricts from "./tashkent.data";
+import samarkandDistricts from "./samarkand.data";
+import kashkadaryaDistricts from "./kashkadarya.data";
+import surkhandaryaDistricts from "./surkhandarya.data";
+import tashkentCityDistricts from "./tashkentCity.data";
+import karakalpakstanDistricts from "./karakalpakstan.data";
+
 const uzbekistanRegions = [
-  { component: AndijanMap, label: "Andijon viloyati" },
-  { component: BukharaMap, label: "Buxoro viloyati" },
-  { component: FerganaMap, label: "Farg'ona viloyati" },
-  { component: JizzakhMap, label: "Jizzax viloyati" },
-  { component: NamanganMap, label: "Namangan viloyati" },
-  { component: NavoiMap, label: "Navoiy viloyati" },
-  { component: KashkadaryaMap, label: "Qashqadaryo viloyati" },
-  { component: KarakalpakstanMap, label: "Qoraqalpog'iston Respublikasi" },
-  { component: SamarkandMap, label: "Samarqand viloyati" },
-  { component: SyrdaryaMap, label: "Sirdaryo viloyati" },
-  { component: SurkhandaryaMap, label: "Surxondaryo viloyati" },
-  { component: TashkentCityMap, label: "Toshkent Shahri" },
-  { component: TashkentMap, label: "Toshkent viloyati" },
-  { component: KhorezmMap, label: "Xorazm viloyati" },
+  {
+    component: AndijanMap,
+    districts: andijanDistricts,
+    label: "Andijon viloyati",
+  },
+  {
+    component: BukharaMap,
+    districts: bukharaDistricts,
+    label: "Buxoro viloyati",
+  },
+  {
+    component: FerganaMap,
+    districts: ferganaDistricts,
+    label: "Farg'ona viloyati",
+  },
+  {
+    component: JizzakhMap,
+    districts: jizzakhDistricts,
+    label: "Jizzax viloyati",
+  },
+  {
+    component: NamanganMap,
+    districts: namanganDistricts,
+    label: "Namangan viloyati",
+  },
+  {
+    component: NavoiMap,
+    districts: navoiDistricts,
+    label: "Navoiy viloyati",
+  },
+  {
+    component: KashkadaryaMap,
+    districts: kashkadaryaDistricts,
+    label: "Qashqadaryo viloyati",
+  },
+  {
+    component: KarakalpakstanMap,
+    districts: karakalpakstanDistricts,
+    label: "Qoraqalpog'iston Respublikasi",
+  },
+  {
+    component: SamarkandMap,
+    districts: samarkandDistricts,
+    label: "Samarqand viloyati",
+  },
+  {
+    component: SyrdaryaMap,
+    districts: syrdaryaDistricts,
+    label: "Sirdaryo viloyati",
+  },
+  {
+    component: SurkhandaryaMap,
+    districts: surkhandaryaDistricts,
+    label: "Surxondaryo viloyati",
+  },
+  {
+    component: TashkentCityMap,
+    districts: tashkentCityDistricts,
+    label: "Toshkent Shahri",
+  },
+  {
+    component: TashkentMap,
+    districts: tashkentDistricts,
+    label: "Toshkent viloyati",
+  },
+  {
+    component: KhorezmMap,
+    districts: khorezmDistricts,
+    label: "Xorazm viloyati",
+  },
 ];
 
 export const getRegionByLabel = (label) => {
@@ -37,6 +109,16 @@ export const getRegionByLabel = (label) => {
       region.label.trim().toLowerCase() === label?.trim().toLowerCase(),
   );
   return finded || uzbekistanRegions[0];
+};
+
+export const getDistrictByLabel = (regionLabel, districtLabel) => {
+  const region = uzbekistanRegions.find(
+    (r) => r.label.trim().toLowerCase() === regionLabel?.trim().toLowerCase(),
+  );
+  const districts = region?.districts || [];
+  return districts.find(
+    (d) => d.label.trim().toLowerCase() === districtLabel?.trim().toLowerCase(),
+  );
 };
 
 export default uzbekistanRegions;
