@@ -27,6 +27,7 @@ import ProfilePage from "@/features/profile/pages/ProfilePage";
 import StatisticsPage from "@/features/statistics/pages/StatisticsPage";
 import ProductsPage from "@/features/products/pages/ProductsPage";
 import UsersPage from "@/features/users/pages/UsersPage";
+import UserStatsPage from "@/features/users/pages/UserStatsPage";
 
 // Guards
 import AuthGuard from "@/shared/components/guards/AuthGuard";
@@ -78,6 +79,7 @@ const Routes = () => {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/users" element={<UsersPage />} />
+          <Route path="/users-stats" element={<UserStatsPage />} />
         </Route>
       </Route>
 
