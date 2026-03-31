@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useMemo, useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Files, FileText, FolderKanban, Users } from "lucide-react";
 
@@ -53,12 +53,21 @@ const AnimatedNumber = ({ target }) => {
 };
 
 /**
- * StatsOverview — 4 animated KPI cards (requests, services, msk, users).
+ * StatsOverview — animated KPI cards filtered by accessible modules.
  *
- * @param {{ filters: { period: string, regionId: string|null, districtId: string|null } }} props
+ * @param {{ filters: object, accessibleModules?: string[] }} props
  * @returns {JSX.Element}
  */
-const StatsOverview = ({ filters }) => {
+const StatsOverview = ({ filters, accessibleModules }) => {
+  const visibleCards = useMemo(() => {
+    if (!accessibleModules || accessibleModules.length === 0) return KPI_CONFIG;
+    return KPI_CONFIG.filter((cfg) => accessibleModules.includes(cfg.key));
+  }, [accessibleModules]);
+
+  const lgCols = visibleCards.length >= 4 ? "lg:grid-cols-4" :
+    visibleCards.length === 3 ? "lg:grid-cols-3" :
+    visibleCards.length === 2 ? "lg:grid-cols-2" : "lg:grid-cols-1";
+
   const { data, isLoading } = useQuery({
     queryKey: ["stats", "overview", filters],
     queryFn: () => statsAPI.getOverview(filters).then((r) => r.data),
@@ -67,8 +76,8 @@ const StatsOverview = ({ filters }) => {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 gap-4 mb-6 lg:grid-cols-4">
-        {KPI_CONFIG.map((cfg) => (
+      <div className={`grid grid-cols-2 gap-4 mb-6 ${lgCols}`}>
+        {visibleCards.map((cfg) => (
           <Card key={cfg.key} className="flex items-center gap-4">
             <div className="size-10 rounded-lg bg-gray-200 animate-pulse flex-shrink-0" />
             <div className="space-y-2">
@@ -82,8 +91,8 @@ const StatsOverview = ({ filters }) => {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-4 mb-6 lg:grid-cols-4">
-      {KPI_CONFIG.map((cfg) => (
+    <div className={`grid grid-cols-2 gap-4 mb-6 ${lgCols}`}>
+      {visibleCards.map((cfg) => (
         <Card key={cfg.key} className="flex items-center gap-4">
           <div
             className={`size-10 rounded-lg flex items-center justify-center flex-shrink-0 ${cfg.iconColor}`}
