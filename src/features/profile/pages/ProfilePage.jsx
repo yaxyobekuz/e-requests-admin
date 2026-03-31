@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { UserCircle } from "lucide-react";
+import { LogOut, UserCircle } from "lucide-react";
 import { profileAPI } from "../api";
 import Button from "@/shared/components/ui/button/Button";
 import Input from "@/shared/components/ui/input/Input";
@@ -12,6 +13,13 @@ import InputPwd from "@/shared/components/ui/input/InputPwd";
  */
 const ProfilePage = () => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("admin_token");
+    localStorage.removeItem("admin_user");
+    navigate("/login");
+  };
 
   const { data: user, isLoading } = useQuery({
     queryKey: ["profile", "me"],
@@ -38,6 +46,7 @@ const ProfilePage = () => {
 
       <InfoSection user={user} queryClient={queryClient} />
       <PasswordSection />
+      <LogoutSection onLogout={handleLogout} />
     </div>
   );
 };
@@ -217,5 +226,28 @@ const PasswordSection = () => {
     </div>
   );
 };
+
+// ============ HISOBDAN CHIQISH ============
+
+/**
+ * Hisobdan chiqish bo'limi
+ * @param {{ onLogout: function }} props
+ */
+const LogoutSection = ({ onLogout }) => (
+  <div className="bg-white border border-red-100 rounded-xl p-5 flex items-center justify-between">
+    <div>
+      <p className="font-semibold text-sm">Hisobdan chiqish</p>
+      <p className="text-xs text-gray-500 mt-0.5">Tizimdan xavfsiz chiqib keting</p>
+    </div>
+    <Button
+      variant="outline"
+      onClick={onLogout}
+      className="text-red-600 border-red-200 hover:bg-red-50 gap-2"
+    >
+      <LogOut className="w-4 h-4" />
+      Chiqish
+    </Button>
+  </div>
+);
 
 export default ProfilePage;
